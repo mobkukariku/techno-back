@@ -1,0 +1,68 @@
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Req,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import { ProjectsService } from './projects.service';
+import { AuthRequest } from '../auth/auth-request.interface';
+import { Roles } from '../decorators/roles.decorator';
+import { AuthGuard, RolesGuard } from '../guards';
+import { CreateProjectsDto } from './dto/create-projects.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { multerConfig } from './projects.multer';
+import { UpdateProjectsDto } from './dto/update-projects.dto';
+
+@Controller('projects')
+export class ProjectsController {
+  constructor(private readonly projectsService: ProjectsService) {}
+
+  @Get()
+  async getAllProjects() {
+    return this.projectsService.getAllProjects();
+  }
+
+  @Get(':id')
+  async getProjectById(@Req() request: AuthRequest) {
+    return this.projectsService.getProjectById(request.params.id);
+  }
+
+  @Post()
+  @Roles('manager')
+  @UseGuards(AuthGuard, RolesGuard)
+  @UseInterceptors(FileInterceptor('image', multerConfig))
+  async createProject(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() dto: CreateProjectsDto,
+  ) {
+    const imageURL = file ? `I/O/${file.filename}` : null;
+
+    return this.projectsService.createProject({
+      ...dto,
+      imageURL: imageURL as string,
+    });
+  }
+
+  @Patch(':id')
+  @Roles('manager')
+  @UseGuards(AuthGuard, RolesGuard)
+  @UseInterceptors(FileInterceptor('image', multerConfig))
+  async updateProject(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+    @Body() dto: Partial<UpdateProjectsDto>,
+  ) {
+    const imageURL = file ? `I/O/${file.filename}` : undefined;
+
+    return this.projectsService.updateProject(id, {
+      ...dto,
+      imageURL,
+    });
+  }
+}
