@@ -7,21 +7,154 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Use {
+model User {
   id       String  @id @default(uuid())
   email    String  @unique
   password String
   name     String
   imageURL String?
   role     Role    @default(member)
-  position String?
-  phoneNumber String?
+
+  news News[]
+
+  memberProfile MemberProfile?
+  workExperience WorkExperience[]
+  headOfDepartments   Department[]
+  departmentMemberships DepartmentMember[]
   createdAt DateTime @default(now())
+
+  @@map("users")
 }
 
+model MemberProfile {
+  id  String  @id @default(uuid())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  String  @unique
+  certificates Int?
+  skills String[]
+  position     String?
+  description  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("member_profiles")
+}
+
+model Department {
+  id String @id @default(uuid())
+  name String?
+  headId String?
+  head      User?      @relation(fields: [headId], references: [id], onDelete: SetNull)
+  parentDepartmentId String?
+  parentDepartment   Department? @relation("DepartmentHierarchy", fields: [parentDepartmentId], references: [id], onDelete: SetNull)
+  subDepartments     Department[] @relation("DepartmentHierarchy")
+
+  members DepartmentMember[]
+
+  projects Projects[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("departments")
+}
+
+model DepartmentMember {
+  id String @id @default(uuid())
+  userId String
+  departmentId String
+  User User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+
+
+  role         MemberRole @default(member)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, departmentId])
+  @@map("department_members")
+}
+
+
+model WorkExperience {
+  id String @id @default(uuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company String
+  position String
+  startDate DateTime?
+  endDate DateTime?
+  description String
+
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("work_experience")
+}
+
+model News {
+  id String @id @default(uuid())
+  title String
+  content String
+  tags String[]
+  imageURL String
+  authorId String
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("news")
+}
+
+model Projects {
+  id String @id @default(uuid())
+  title String
+  description String
+  imageUrl String
+
+  departmentId String
+  department Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("projects")
+}
+
+model Requests {
+  id        String    @id @default(uuid())
+  name      String
+  email     String
+  message   String
+  direction Direction
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("requests")
+}
+
+
+
+
+enum Direction {
+  SOFTWARE
+  HARDWARE
+  DATA_SCIENCE
+}
 
 enum Role {
   member
   manager
   admin
+}
+
+enum MemberRole {
+  member
+  head
 }
