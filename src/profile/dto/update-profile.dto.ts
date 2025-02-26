@@ -2,7 +2,8 @@ import {
   IsArray,
   IsEnum,
   IsInt,
-  IsNotEmpty, IsOptional,
+  IsNotEmpty,
+  IsOptional,
   IsString,
   IsUUID,
 } from 'class-validator';

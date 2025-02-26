@@ -55,7 +55,9 @@ export class NewsController {
     @UploadedFile() file: Express.Multer.File,
     @Body() dto: CreateNewsDto,
   ) {
-    const imageURL = file ? `I/O/${file.filename}` : null;
+    const imageURL = file
+      ? `http://localhost:4000/images/news/${file.filename}`
+      : null;
 
     return this.newsService.createNews(request, {
       ...dto,
@@ -72,7 +74,7 @@ export class NewsController {
     @UploadedFile() file: Express.Multer.File,
     @Body() dto: Partial<CreateNewsDto>,
   ) {
-    const imageURL = file ? `I/O/${file.filename}` : undefined;
+    const imageURL = file ? `images/news/${file.filename}` : undefined;
 
     return this.newsService.updateNews(id, {
       ...dto,

@@ -1,4 +1,11 @@
-import { IsArray, IsNotEmpty, IsString, IsUrl } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUrl,
+  IsUUID,
+} from 'class-validator';
 
 export class CreateNewsDto {
   @IsNotEmpty({ message: 'Title cannot be empty' })
@@ -10,12 +17,14 @@ export class CreateNewsDto {
   content: string;
 
   @IsArray()
+  @IsUUID()
   @IsString({ each: true })
-  tags: string[];
+  tagIds: string[];
 
   @IsUrl()
+  @IsOptional()
   @IsNotEmpty()
-  imageURL: string;
+  imageURL?: string;
 
   @IsString()
   @IsNotEmpty()

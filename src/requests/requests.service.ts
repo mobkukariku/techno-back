@@ -14,7 +14,7 @@ export class RequestsService {
         name,
         email,
         message,
-        direction,
+        direction: { connect: { id: direction } },
       },
     });
   }

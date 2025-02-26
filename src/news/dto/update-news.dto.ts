@@ -1,20 +1,4 @@
-import { IsString, IsOptional, IsArray, IsUrl } from 'class-validator';
+import { PartialType } from '@nestjs/swagger';
+import { CreateNewsDto } from './create-news.dto';
 
-export class UpdateNewsDto {
-  @IsString()
-  @IsOptional()
-  title?: string;
-
-  @IsString()
-  @IsOptional()
-  content?: string;
-
-  @IsArray()
-  @IsString({ each: true })
-  @IsOptional()
-  tags?: string[];
-
-  @IsUrl()
-  @IsOptional()
-  imageURL?: string;
-}
+export class UpdateNewsDto extends PartialType(CreateNewsDto){}

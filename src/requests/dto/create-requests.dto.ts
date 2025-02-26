@@ -1,5 +1,4 @@
-import { IsEmail, IsEnum, IsNotEmpty, IsString } from 'class-validator';
-import { Direction } from '@prisma/client';
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateRequestsDto {
   @IsNotEmpty({ message: 'Title cannot be empty' })
@@ -15,6 +14,6 @@ export class CreateRequestsDto {
   message: string;
 
   @IsNotEmpty({ message: 'Direction cannot be empty' })
-  @IsEnum(Direction)
-  direction: Direction;
+  @IsString({ message: 'Direction must be a string' }) // Так как Prisma Direction — это строка
+  direction: string;
 }

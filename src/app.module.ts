@@ -5,6 +5,9 @@ import { NewsModule } from './news/news.module';
 import { ProjectsModule } from './projects/projects.module';
 import { ProfileModule } from './profile/profile.module';
 import { RequestsModule } from './requests/requests.module';
+import { DepartmentsModule } from './departments/departments.module';
+import { TagsModule } from './tags/tags.module';
+import { DirectionsModule } from './directions/directions.module';
 
 @Module({
   imports: [
@@ -14,6 +17,9 @@ import { RequestsModule } from './requests/requests.module';
     ProjectsModule,
     ProfileModule,
     RequestsModule,
+    DepartmentsModule,
+    TagsModule,
+    DirectionsModule,
   ],
   controllers: [],
   providers: [],

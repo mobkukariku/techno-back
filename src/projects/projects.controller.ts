@@ -58,7 +58,7 @@ export class ProjectsController {
     @UploadedFile() file: Express.Multer.File,
     @Body() dto: Partial<UpdateProjectsDto>,
   ) {
-    const imageURL = file ? `I/O/${file.filename}` : undefined;
+    const imageURL = file ? `images/projects/${file.filename}` : undefined;
 
     return this.projectsService.updateProject(id, {
       ...dto,

@@ -17,8 +17,7 @@ export class UpdateRequestsDto {
   @IsString({ message: 'Message must be a string' })
   message?: string;
 
-  @IsOptional()
   @IsNotEmpty({ message: 'Direction cannot be empty' })
-  @IsEnum(Direction)
-  direction?: Direction;
+  @IsString({ message: 'Direction must be a string' }) // Так как Prisma Direction — это строка
+  direction: string;
 }

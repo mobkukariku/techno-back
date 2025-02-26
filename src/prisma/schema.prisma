@@ -12,7 +12,6 @@ model User {
   email    String  @unique
   password String
   name     String
-  imageURL String?
   role     Role    @default(member)
 
   news News[]
@@ -28,7 +27,7 @@ model User {
 
 model MemberProfile {
   id  String  @id @default(uuid())
-
+  imageURL String?
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId  String  @unique
   certificates Int?
@@ -96,20 +95,37 @@ model WorkExperience {
   @@map("work_experience")
 }
 
-model News {
-  id String @id @default(uuid())
-  title String
-  content String
-  tags String[]
-  imageURL String
-  authorId String
-  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+model Tags {
+  id   String @id @default(uuid())
+  name String @unique()
+  news NewsTags[]
+}
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model News {
+  id        String     @id @default(uuid())
+  title     String
+  content   String
+  imageURL  String?
+  authorId  String
+  author    User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  tags      NewsTags[]
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 
   @@map("news")
 }
+
+model NewsTags {
+  newsId String
+  tagId  String
+
+  news News @relation(fields: [newsId], references: [id], onDelete: Cascade)
+  tag  Tags @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([newsId, tagId])
+}
+
 
 model Projects {
   id String @id @default(uuid())
@@ -127,26 +143,29 @@ model Projects {
 }
 
 model Requests {
-  id        String    @id @default(uuid())
-  name      String
-  email     String
-  message   String
-  direction Direction
+  id         String    @id @default(uuid())
+  name       String
+  email      String
+  message    String
+  direction  Direction @relation(fields: [directionId], references: [id])
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  directionId String
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@map("requests")
 }
 
+model Direction {
+  id   String @id @default(uuid())
+  name String @unique
 
+  requests Requests[]
 
-
-enum Direction {
-  SOFTWARE
-  HARDWARE
-  DATA_SCIENCE
+  @@map("directions")
 }
+
 
 enum Role {
   member
