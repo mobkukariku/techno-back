@@ -46,6 +46,11 @@ export class NewsController {
     return this.newsService.getNewsById(request.params.id);
   }
 
+  @Get('/lastNews/:id')
+  async getLastNews(@Param('id') id: string) {
+    return this.newsService.getLastNews(id);
+  }
+
   @Post()
   @Roles('manager')
   @UseGuards(AuthGuard, RolesGuard)
@@ -88,4 +93,6 @@ export class NewsController {
   async deleteNews(@Param('id') id: string) {
     return this.newsService.deleteNews(id);
   }
+
+
 }

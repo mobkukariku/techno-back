@@ -14,7 +14,7 @@ export class UpdateProjectsDto {
   @IsOptional()
   departmentId?: string;
 
-  @IsUrl()
+  @IsString({ each: true })
   @IsOptional()
-  imageURL?: string;
+  images?: string[];
 }

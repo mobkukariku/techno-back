@@ -7,8 +7,48 @@ import { UpdateProjectsDto } from './dto/update-projects.dto';
 export class ProjectsService {
   constructor(private prisma: PrismaService) {}
 
-  async getAllProjects() {
-    return this.prisma.projects.findMany();
+  async getAllProjects(params: {
+    search?: string;
+    departmentId?: string;
+    sort?: string;
+    limit?: number;
+    page?: number;
+  }) {
+    const { search, departmentId, sort, limit = 3, page = 1 } = params;
+
+    if (page < 1 || limit < 1) {
+      throw new Error('Page and limit must be greater than 0');
+    }
+
+    const skip = (page - 1) * limit;
+
+    return this.prisma.projects.findMany({
+      where: {
+        AND: [
+          search
+            ? {
+                OR: [
+                  { title: { contains: search, mode: 'insensitive' } },
+                  { description: { contains: search, mode: 'insensitive' } },
+                ],
+              }
+            : {},
+
+          departmentId ? { departmentId: departmentId } : {},
+        ],
+      },
+      orderBy: { createdAt: sort === 'newest' ? 'desc' : 'asc' },
+      skip,
+      take: limit,
+      include: {
+        images: {
+          select: {
+            id: true,
+            imageUrl: true,
+          },
+        },
+      },
+    });
   }
 
   async getProjectById(id: string) {
@@ -19,21 +59,24 @@ export class ProjectsService {
     });
   }
 
-  async createProject(dto: CreateProjectsDto) {
-    const { title, description, departmentId, imageURL } = dto;
+  async createProject(dto: CreateProjectsDto, imageUrls: string[]) {
+    const { title, description, departmentId } = dto;
 
     return this.prisma.projects.create({
       data: {
         title,
         description,
         departmentId,
-        imageUrl: imageURL,
+        images: {
+          create: imageUrls.map((url) => ({ imageUrl: url })),
+        },
       },
+      include: { images: true },
     });
   }
 
   async updateProject(id: string, dto: UpdateProjectsDto) {
-    const { title, description, departmentId, imageURL: imageUrl } = dto;
+    const { title, description, departmentId } = dto;
 
     const existingProject = await this.prisma.projects.findUnique({
       where: {
@@ -53,7 +96,6 @@ export class ProjectsService {
         title,
         description,
         departmentId,
-        imageUrl,
       },
     });
   }

@@ -20,6 +20,8 @@ model User {
   workExperience WorkExperience[]
   headOfDepartments   Department[]
   departmentMemberships DepartmentMember[]
+
+  isActive Boolean @default(true)
   createdAt DateTime @default(now())
 
   @@map("users")
@@ -128,19 +130,31 @@ model NewsTags {
 
 
 model Projects {
-  id String @id @default(uuid())
-  title String
+  id          String    @id @default(uuid())
+  title       String
   description String
-  imageUrl String
+  images      ProjectImage[]
 
   departmentId String
-  department Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 
   @@map("projects")
 }
+
+model ProjectImage {
+  id        String  @id @default(uuid())
+  imageUrl  String
+  projectId String
+  project   Projects @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@map("project_images")
+}
+
 
 model Requests {
   id         String    @id @default(uuid())

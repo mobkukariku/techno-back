@@ -23,7 +23,7 @@ export class CreateProjectsDto {
   @IsString({ each: true })
   departmentId: string;
 
-  @IsUrl()
-  @IsNotEmpty()
-  imageURL: string;
+  @IsString({ each: true })
+  @IsOptional()
+  images?: string[];
 }

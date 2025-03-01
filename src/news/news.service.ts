@@ -119,4 +119,14 @@ export class NewsService {
       where: { id },
     });
   }
+
+  async getLastNews(exceptId: string) {
+    return this.prisma.news.findMany({
+      where: {
+        id: { not: exceptId },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 3,
+    });
+  }
 }

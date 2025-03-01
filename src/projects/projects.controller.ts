@@ -5,8 +5,10 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UploadedFile,
+  UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -15,7 +17,10 @@ import { AuthRequest } from '../auth/auth-request.interface';
 import { Roles } from '../decorators/roles.decorator';
 import { AuthGuard, RolesGuard } from '../guards';
 import { CreateProjectsDto } from './dto/create-projects.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  FileFieldsInterceptor,
+  FileInterceptor,
+} from '@nestjs/platform-express';
 import { multerConfig } from './projects.multer';
 import { UpdateProjectsDto } from './dto/update-projects.dto';
 
@@ -24,8 +29,20 @@ export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 
   @Get()
-  async getAllProjects() {
-    return this.projectsService.getAllProjects();
+  async getAllProjects(
+    @Query('search') search?: string,
+    @Query('directionId') directionId?: string,
+    @Query('sort') sort?: string,
+    @Query('limit') limit?: number,
+    @Query('page') page?: number,
+  ) {
+    return this.projectsService.getAllProjects({
+      search: search,
+      departmentId: directionId,
+      sort,
+      limit: limit ? Number(limit) : undefined,
+      page: page ? Number(page) : undefined,
+    });
   }
 
   @Get(':id')
@@ -36,17 +53,19 @@ export class ProjectsController {
   @Post()
   @Roles('manager')
   @UseGuards(AuthGuard, RolesGuard)
-  @UseInterceptors(FileInterceptor('image', multerConfig))
+  @UseInterceptors(
+    FileFieldsInterceptor([{ name: 'images', maxCount: 10 }], multerConfig),
+  )
   async createProject(
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFiles() files: { images?: Express.Multer.File[] },
     @Body() dto: CreateProjectsDto,
   ) {
-    const imageURL = file ? `I/O/${file.filename}` : null;
+    const imageUrls =
+      files?.images?.map(
+        (file) => `http://localhost:4000/images/projects/${file.filename}`,
+      ) || [];
 
-    return this.projectsService.createProject({
-      ...dto,
-      imageURL: imageURL as string,
-    });
+    return this.projectsService.createProject(dto, imageUrls);
   }
 
   @Patch(':id')
@@ -58,11 +77,10 @@ export class ProjectsController {
     @UploadedFile() file: Express.Multer.File,
     @Body() dto: Partial<UpdateProjectsDto>,
   ) {
-    const imageURL = file ? `images/projects/${file.filename}` : undefined;
+    // const imageURL = file ? `images/projects/${file.filename}` : undefined;
 
     return this.projectsService.updateProject(id, {
       ...dto,
-      imageURL,
     });
   }
 }
