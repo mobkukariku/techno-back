@@ -93,6 +93,4 @@ export class NewsController {
   async deleteNews(@Param('id') id: string) {
     return this.newsService.deleteNews(id);
   }
-
-
 }
