@@ -7,7 +7,7 @@ export class UsersService {
   constructor(private prisma: PrismaService) {}
 
   async getAllUsers() {
-    return this.prisma.user.findMany({});
+    return this.prisma.user.findMany();
   }
   async getUserById(id: string) {
     return this.prisma.user.findUnique({

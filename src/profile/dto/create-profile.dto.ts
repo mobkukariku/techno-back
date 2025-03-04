@@ -4,7 +4,8 @@ import {
   IsInt,
   IsNotEmpty,
   IsOptional,
-  IsString, IsUrl,
+  IsString,
+  IsUrl,
   IsUUID,
 } from 'class-validator';
 import { MemberRole } from '@prisma/client';
@@ -16,7 +17,8 @@ export class CreateProfileDto {
 
   @IsUrl()
   @IsOptional()
-  ImageURL?: string;
+  @IsNotEmpty()
+  imageURL?: string;
 
   @IsInt()
   @IsOptional()

@@ -5,13 +5,17 @@ import {
   Param,
   Patch,
   Post,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ProfileService } from './profile.service';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { AuthGuard, RolesGuard } from '../guards';
 import { Roles } from '../decorators/roles.decorator';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { multerConfig } from '../news/news.multer';
 
 @Controller('profile')
 export class ProfileController {
@@ -19,8 +23,19 @@ export class ProfileController {
 
   @Post()
   @UseGuards(AuthGuard)
-  create(@Body() dto: CreateProfileDto) {
-    return this.profileService.createProfile(dto);
+  @UseInterceptors(FileInterceptor('image', multerConfig))
+  create(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() dto: CreateProfileDto,
+  ) {
+    const imageURL = file
+      ? `http://localhost:4000/images/profiles/${file.filename}`
+      : null;
+
+    return this.profileService.createProfile({
+      ...dto,
+      imageURL: imageURL as string,
+    });
   }
 
   @Get()

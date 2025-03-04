@@ -52,8 +52,14 @@ export class NewsService {
   async createNews(request: AuthRequest, dto: CreateNewsDto) {
     const { title, content, tagIds, imageURL } = dto;
     const authorId = request.user?.id;
-
     const tagIdArray = Array.isArray(tagIds) ? tagIds : tagIds ? [tagIds] : [];
+
+    const existingTags = await this.prisma.tags.findMany({
+      where: { id: { in: tagIdArray } },
+      select: { id: true },
+    });
+
+    const validTagIds = existingTags.map((tag) => tag.id);
 
     return this.prisma.news.create({
       data: {
@@ -61,9 +67,9 @@ export class NewsService {
         content,
         imageURL,
         author: { connect: { id: authorId } },
-        tags: tagIdArray.length
+        tags: validTagIds.length
           ? {
-              create: tagIdArray.map((tagId) => ({
+              create: validTagIds.map((tagId) => ({
                 tag: { connect: { id: tagId } },
               })),
             }
