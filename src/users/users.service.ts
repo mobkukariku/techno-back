@@ -7,18 +7,62 @@ export class UsersService {
   constructor(private prisma: PrismaService) {}
 
   async getAllUsers() {
-    return this.prisma.user.findMany();
+    return this.prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        isActive: true,
+        departmentMemberships: {
+          select: {
+            departmentId: true,
+            role: true,
+          },
+        },
+      },
+    });
   }
+
+  async getAllUsersMembers() {
+    return this.prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        memberProfile: {
+          select: {
+            imageURL: true,
+            position: true,
+          },
+        },
+      },
+    });
+  }
+
   async getUserById(id: string) {
     return this.prisma.user.findUnique({
       where: {
         id,
       },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        memberProfile: {
+          select: {
+            imageURL: true,
+            position: true,
+            skills: true,
+            description: true,
+          },
+        },
+        contacts: true,
+      },
     });
   }
 
   async getMe(request: AuthRequest) {
-    console.log('User in request:', request.user);
     const id = request.user?.id;
 
     if (!id) {
@@ -31,6 +75,15 @@ export class UsersService {
         id: true,
         email: true,
         name: true,
+        memberProfile: {
+          select: {
+            imageURL: true,
+            position: true,
+            skills: true,
+            description: true,
+          },
+        },
+        contacts: true,
       },
     });
   }

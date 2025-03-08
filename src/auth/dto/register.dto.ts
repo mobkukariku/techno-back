@@ -6,6 +6,7 @@ import {
   IsUUID,
   IsOptional,
 } from 'class-validator';
+import { Role } from '@prisma/client';
 
 export class RegisterDto {
   @IsUUID()
@@ -24,9 +25,8 @@ export class RegisterDto {
   @MinLength(6, { message: 'Password must be at least 6 characters' })
   password: string;
 
-  @IsString({ message: 'Role must be a string' })
   @IsOptional()
-  role?: string;
+  role?: Role;
 
   @IsUUID('4', { each: true })
   @IsOptional()

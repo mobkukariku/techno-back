@@ -20,7 +20,7 @@ model User {
   workExperience WorkExperience[]
   headOfDepartments   Department[]
   departmentMemberships DepartmentMember[]
-
+  contacts Contact[]
   isActive Boolean @default(true)
   createdAt DateTime @default(now())
 
@@ -28,20 +28,63 @@ model User {
 }
 
 model MemberProfile {
-  id  String  @id @default(uuid())
-  imageURL String?
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId  String  @unique
-  certificates Int?
-  skills String[]
-  position     String?
-  description  String?
+  id          String  @id @default(uuid())
+  imageURL    String?
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String  @unique
+  skills      String[]
+  position    String?
+  description String?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  certificates Certificate[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@map("member_profiles")
 }
+
+model Certificate {
+  id              String  @id @default(uuid())
+  memberProfile   MemberProfile @relation(fields: [memberProfileId], references: [id], onDelete: Cascade)
+  memberProfileId String
+
+  name           String
+  organization   String?
+  issueDate      DateTime
+  expirationDate DateTime?
+  certificateURL String?
+
+  createdAt DateTime @default(now())
+
+  @@map("certificates")
+}
+
+
+model Contact {
+  id     String @id @default(uuid())
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  type   ContactType
+  value  String
+
+  createdAt DateTime @default(now())
+
+  @@map("contacts")
+}
+
+enum ContactType {
+  EMAIL
+  PHONE
+  TELEGRAM
+  LINKEDIN
+  GITHUB
+  OTHER
+}
+
+
+
 
 model Department {
   id String @id @default(uuid())
@@ -51,7 +94,7 @@ model Department {
   parentDepartmentId String?
   parentDepartment   Department? @relation("DepartmentHierarchy", fields: [parentDepartmentId], references: [id], onDelete: SetNull)
   subDepartments     Department[] @relation("DepartmentHierarchy")
-
+  isActive  Boolean @default(true)
   members DepartmentMember[]
 
   projects Projects[]
@@ -111,7 +154,7 @@ model News {
   authorId  String
   author    User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
   tags      NewsTags[]
-
+  isActive  Boolean @default(true)
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 
@@ -137,7 +180,7 @@ model Projects {
 
   departmentId String
   department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
-
+  isActive  Boolean @default(true)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
@@ -164,7 +207,7 @@ model Requests {
   direction  Direction @relation(fields: [directionId], references: [id])
 
   directionId String
-
+  isActive  Boolean @default(true)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
@@ -176,7 +219,7 @@ model Direction {
   name String @unique
 
   requests Requests[]
-
+  isActive  Boolean @default(true)
   @@map("directions")
 }
 

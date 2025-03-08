@@ -1,7 +1,6 @@
 import {
   IsArray,
   IsEnum,
-  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -19,10 +18,6 @@ export class CreateProfileDto {
   @IsOptional()
   @IsNotEmpty()
   imageURL?: string;
-
-  @IsInt()
-  @IsOptional()
-  certificates?: number;
 
   @IsArray()
   @IsString({ each: true })

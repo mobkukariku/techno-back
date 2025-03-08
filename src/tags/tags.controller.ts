@@ -6,7 +6,7 @@ export class TagsController {
   constructor(private readonly tagsService: TagsService) {}
 
   @Get()
-  async getAll(){
+  async getAll() {
     return this.tagsService.getAll();
   }
 }

@@ -4,6 +4,7 @@ import * as bcrypt from 'bcrypt';
 import { RegisterDto } from './dto/register.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -19,7 +20,11 @@ export class AuthService {
     password: string,
     hashedPassword: string,
   ): Promise<boolean> {
-    return await bcrypt.compare(password, hashedPassword);
+    return bcrypt.compare(password, hashedPassword);
+  }
+
+   generateToken(userId: string, role: string) {
+    return this.jwtService.sign({ userId, role }, { expiresIn: '7d' });
   }
 
   async register(dto: RegisterDto) {
@@ -31,6 +36,7 @@ export class AuthService {
         email: dto.email,
         name: dto.name,
         password: hashedPassword,
+        role: dto.role,
         headOfDepartments: dto.headOfDepartments
           ? {
               createMany: {
@@ -51,9 +57,9 @@ export class AuthService {
       },
     });
 
-    const token = this.jwtService.sign({ userId: user.id });
+    const token = this.generateToken(user.id, user.role);
 
-    return { message: 'User is Created', token };
+    return { message: 'User created', token, userId: user.id, role: user.role };
   }
 
   async login(dto: LoginDto) {
@@ -64,6 +70,7 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('Invalid email or password');
     }
+
     const isPasswordValid = await this.comparePassword(
       dto.password,
       user.password,
@@ -73,8 +80,13 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    const token = this.jwtService.sign({ userId: user.id });
+    const token = await this.generateToken(user.id, user.role);
 
-    return { message: 'Login successfull', token };
+    return {
+      message: 'Login successful',
+      token,
+      userId: user.id,
+      role: user.role,
+    };
   }
 }

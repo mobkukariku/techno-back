@@ -31,14 +31,14 @@ export class ProjectsController {
   @Get()
   async getAllProjects(
     @Query('search') search?: string,
-    @Query('directionId') directionId?: string,
+    @Query('departmentId') departmentId?: string,
     @Query('sort') sort?: string,
     @Query('limit') limit?: number,
     @Query('page') page?: number,
   ) {
     return this.projectsService.getAllProjects({
       search: search,
-      departmentId: directionId,
+      departmentId: departmentId,
       sort,
       limit: limit ? Number(limit) : undefined,
       page: page ? Number(page) : undefined,

@@ -6,7 +6,7 @@ export class DirectionsController {
   constructor(private readonly directionsService: DirectionsService) {}
 
   @Get()
-  async getAll(){
+  async getAll() {
     return this.directionsService.getAllDirections();
   }
 }

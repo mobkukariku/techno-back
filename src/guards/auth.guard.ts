@@ -17,8 +17,6 @@ export interface RequestUser {
   role: Role;
 }
 
-
-
 interface JwtPayload {
   userId: string;
   email: string;

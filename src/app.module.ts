@@ -8,6 +8,9 @@ import { RequestsModule } from './requests/requests.module';
 import { DepartmentsModule } from './departments/departments.module';
 import { TagsModule } from './tags/tags.module';
 import { DirectionsModule } from './directions/directions.module';
+import { MembersModule } from './members/members.module';
+import { WorkexperienceModule } from './workexperience/workexperience.module';
+import { ContactsModule } from './contacts/contacts.module';
 
 @Module({
   imports: [
@@ -20,6 +23,9 @@ import { DirectionsModule } from './directions/directions.module';
     DepartmentsModule,
     TagsModule,
     DirectionsModule,
+    MembersModule,
+    WorkexperienceModule,
+    ContactsModule,
   ],
   controllers: [],
   providers: [],

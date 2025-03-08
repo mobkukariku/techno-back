@@ -15,11 +15,23 @@ import { AuthGuard, RolesGuard } from '../guards';
 import { Roles } from '../decorators/roles.decorator';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { multerConfig } from '../news/news.multer';
+import { multerConfig } from './profile.multer';
 
 @Controller('profile')
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
+
+  @Get()
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin')
+  findAll() {
+    return this.profileService.findAll();
+  }
+
+  @Get(':id')
+  getById(@Param('id') id: string) {
+    return this.profileService.findOne(id);
+  }
 
   @Post()
   @UseGuards(AuthGuard)
@@ -36,18 +48,6 @@ export class ProfileController {
       ...dto,
       imageURL: imageURL as string,
     });
-  }
-
-  @Get()
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles('admin')
-  findAll() {
-    return this.profileService.findAll();
-  }
-
-  @Get(':id')
-  getById(@Param('id') id: string) {
-    return this.profileService.findOne(id);
   }
 
   @Patch(':id')

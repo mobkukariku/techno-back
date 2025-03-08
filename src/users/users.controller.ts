@@ -16,6 +16,11 @@ export class UsersController {
     return this.usersService.getAllUsers();
   }
 
+  @Get('/read')
+  async getAllUsersForRead() {
+    return this.usersService.getAllUsersMembers();
+  }
+
   @Get('/me')
   @UseGuards(AuthGuard)
   async getMe(@Req() request: AuthRequest) {
@@ -23,8 +28,6 @@ export class UsersController {
   }
 
   @Get('/:id')
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles('admin')
   async getUserById(@Param('id') id: string) {
     return this.usersService.getUserById(id);
   }

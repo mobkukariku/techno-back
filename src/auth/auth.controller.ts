@@ -8,9 +8,14 @@ import { LoginDto } from './dto/login.dto';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  private setAuthCookie(res: Response, accessToken: string) {
-    res.cookie('token', accessToken, {
+  private setAuthCookies(res: Response, token: string, role: string) {
+    res.cookie('token', token, {
       httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+    });
+    res.cookie('role', role, {
+      httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
     });
@@ -21,8 +26,8 @@ export class AuthController {
     @Body() dto: RegisterDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { token } = await this.authService.register(dto);
-    this.setAuthCookie(res, token);
+    const { token, role } = await this.authService.register(dto);
+    this.setAuthCookies(res, token, role);
     return { message: 'Registration successful' };
   }
 
@@ -31,14 +36,15 @@ export class AuthController {
     @Body() dto: LoginDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { token } = await this.authService.login(dto);
-    this.setAuthCookie(res, token);
+    const { token, role } = await this.authService.login(dto);
+    this.setAuthCookies(res, token, role);
     return { message: 'Login successful' };
   }
 
   @Post('logout')
   logout(@Res({ passthrough: true }) res: Response) {
     res.clearCookie('token');
+    res.clearCookie('role');
     return { message: 'Logout successful' };
   }
 }

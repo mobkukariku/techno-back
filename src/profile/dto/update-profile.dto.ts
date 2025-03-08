@@ -1,7 +1,6 @@
 import {
   IsArray,
   IsEnum,
-  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -15,15 +14,12 @@ export class UpdateProfileDto {
   @IsUUID()
   userId?: string;
 
-  @IsInt()
-  @IsOptional()
-  certificates?: number;
-
   @IsArray()
   @IsOptional()
   @IsString({ each: true })
   skills?: string[];
 
+  @IsOptional()
   @IsOptional()
   @IsEnum(MemberRole)
   position?: MemberRole;

@@ -15,14 +15,26 @@ export type DepartmentNode = {
 @Injectable()
 export class DepartmentsService {
   constructor(private prisma: PrismaService) {}
-  create(dto: CreateDepartmentDto) {
-    return this.prisma.department.create({
+  async create(dto: CreateDepartmentDto) {
+    const department = await this.prisma.department.create({
       data: {
         name: dto.name,
         headId: dto.headId,
         parentDepartmentId: dto.parentDepartmentId,
       },
     });
+
+    if (dto.headId) {
+      await this.prisma.departmentMember.create({
+        data: {
+          userId: dto.headId,
+          departmentId: department.id,
+          role: 'head',
+        },
+      });
+    }
+
+    return department;
   }
 
   findAll() {
@@ -32,17 +44,41 @@ export class DepartmentsService {
   findOne(id: string) {
     return this.prisma.department.findUnique({
       where: { id },
+      include: {
+        head: true,
+        parentDepartment: true,
+        subDepartments: true,
+        members: {
+          include: { User: true },
+        },
+      },
     });
   }
-
-  update(id: string, dto: UpdateDepartmentDto) {
-    return this.prisma.department.update({
+  async update(id: string, dto: UpdateDepartmentDto) {
+    const updatedDepartment = await this.prisma.department.update({
       where: { id },
       data: dto,
     });
+
+    if (dto.headId) {
+      await this.prisma.departmentMember.upsert({
+        where: {
+          userId_departmentId: { userId: dto.headId, departmentId: id },
+        },
+        update: { role: 'head' },
+        create: { userId: dto.headId, departmentId: id, role: 'head' },
+      });
+    }
+
+    return updatedDepartment;
   }
 
-  remove(id: string) {
+  async remove(id: string) {
+    await this.prisma.department.updateMany({
+      where: { parentDepartmentId: id },
+      data: { parentDepartmentId: null },
+    });
+
     return this.prisma.department.delete({
       where: { id },
     });

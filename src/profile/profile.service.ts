@@ -10,7 +10,7 @@ export class ProfileService {
     return this.prisma.memberProfile.create({
       data: {
         userId: dto.userId,
-        certificates: dto.certificates,
+        imageURL: dto.imageURL,
         skills: { set: dto.skills },
         position: dto.position,
         description: dto.description,
@@ -31,7 +31,7 @@ export class ProfileService {
   async update(id: string, updateProfileDto: UpdateProfileDto) {
     return this.prisma.memberProfile.update({
       where: { id },
-      data: updateProfileDto,
+      data: { ...updateProfileDto },
     });
   }
 }

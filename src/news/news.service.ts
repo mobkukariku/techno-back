@@ -25,6 +25,7 @@ export class NewsService {
 
     return this.prisma.news.findMany({
       where: {
+        isActive: true,
         OR: search
           ? [
               { title: { contains: search, mode: 'insensitive' } },
@@ -121,8 +122,9 @@ export class NewsService {
       throw new NotFoundException('Новость не найдена');
     }
 
-    return this.prisma.news.delete({
+    return this.prisma.news.update({
       where: { id },
+      data: { isActive: false },
     });
   }
 
