@@ -14,10 +14,6 @@ export class UpdateProfileDto {
   @IsUUID()
   userId?: string;
 
-  @IsArray()
-  @IsOptional()
-  @IsString({ each: true })
-  skills?: string[];
 
   @IsOptional()
   @IsOptional()

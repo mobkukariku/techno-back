@@ -1,5 +1,4 @@
 import {
-  IsArray,
   IsEnum,
   IsNotEmpty,
   IsOptional,
@@ -18,10 +17,6 @@ export class CreateProfileDto {
   @IsOptional()
   @IsNotEmpty()
   imageURL?: string;
-
-  @IsArray()
-  @IsString({ each: true })
-  skills: string[];
 
   @IsEnum(MemberRole)
   @IsOptional()

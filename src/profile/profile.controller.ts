@@ -16,7 +16,6 @@ import { Roles } from '../decorators/roles.decorator';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerConfig } from './profile.multer';
-
 @Controller('profile')
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
@@ -53,7 +52,12 @@ export class ProfileController {
   @Patch(':id')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('admin')
-  update(@Param('id') id: string, @Body() updateProfileDto: UpdateProfileDto) {
-    return this.profileService.update(id, updateProfileDto);
+  @UseInterceptors(FileInterceptor('image', multerConfig))
+  async update(
+    @Param('id') id: string,
+    @Body() updateProfileDto: UpdateProfileDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    return this.profileService.update(id, updateProfileDto, file);
   }
 }

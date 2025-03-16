@@ -32,7 +32,7 @@ export class CreateWorkExperieceDto {
   endDate?: Date;
 
   @IsString()
+  @IsOptional()
   @IsNotEmpty()
-  description: string;
-
+  description?: string;
 }

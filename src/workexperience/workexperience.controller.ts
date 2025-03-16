@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { WorkexperienceService } from './workexperience.service';
 import { CreateWorkExperieceDto } from './dto/create-workExperiece.dto';
 import { AuthGuard } from '../guards';
@@ -16,5 +25,17 @@ export class WorkexperienceController {
   @UseGuards(AuthGuard)
   async create(@Body() dto: CreateWorkExperieceDto) {
     return this.workexperienceService.create(dto);
+  }
+
+  @Patch('/:id')
+  @UseGuards(AuthGuard)
+  async update(@Param('id') id: string, @Body() dto: CreateWorkExperieceDto) {
+    return this.workexperienceService.update(id, dto);
+  }
+
+  @Delete('/:id')
+  @UseGuards(AuthGuard)
+  async delete(@Param('id') id: string) {
+    return this.workexperienceService.delete(id);
   }
 }

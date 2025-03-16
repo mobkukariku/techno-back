@@ -6,7 +6,6 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
 model User {
   id       String  @id @default(uuid())
   email    String  @unique
@@ -32,16 +31,38 @@ model MemberProfile {
   imageURL    String?
   user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      String  @unique
-  skills      String[]
   position    String?
   description String?
 
+  skills      MemberProfileSkill[]
   certificates Certificate[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@map("member_profiles")
+}
+
+model Skill {
+  id   String @id @default(uuid())
+  name String @unique
+
+  profiles MemberProfileSkill[]
+
+  @@map("skills")
+}
+
+model MemberProfileSkill {
+  profileId String
+  skillId   String
+
+  profile MemberProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  skill   Skill         @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@id([profileId, skillId])
+
+
+  @@map("member_profile_skills")
 }
 
 model Certificate {
@@ -75,7 +96,6 @@ model Contact {
 }
 
 enum ContactType {
-  EMAIL
   PHONE
   TELEGRAM
   LINKEDIN
@@ -131,7 +151,7 @@ model WorkExperience {
   position String
   startDate DateTime?
   endDate DateTime?
-  description String
+  description String?
 
 
   createdAt DateTime @default(now())
