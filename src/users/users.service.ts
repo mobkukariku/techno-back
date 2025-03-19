@@ -53,11 +53,9 @@ export class UsersService {
           select: {
             imageURL: true,
             position: true,
-            skills: true,
             description: true,
           },
         },
-        contacts: true,
       },
     });
   }
@@ -83,7 +81,6 @@ export class UsersService {
             description: true,
           },
         },
-        contacts: true,
       },
     });
   }
