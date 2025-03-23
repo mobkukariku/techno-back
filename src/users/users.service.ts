@@ -1,13 +1,23 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthRequest } from '../auth/auth-request.interface';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async getAllUsers() {
+  async getAllUsers(search?: string) {
     return this.prisma.user.findMany({
+      where: search
+        ? {
+            OR: [
+              { id: search },
+              { email: { contains: search, mode: 'insensitive' } },
+              { name: { contains: search, mode: 'insensitive' } },
+            ],
+          }
+        : undefined,
       select: {
         id: true,
         name: true,
@@ -81,6 +91,18 @@ export class UsersService {
             description: true,
           },
         },
+      },
+    });
+  }
+
+  async updateUser(id: string, dto: UpdateUserDto) {
+    return this.prisma.user.update({
+      where: { id },
+      data: {
+        name: dto.name,
+        email: dto.email,
+        role: dto.role,
+        isActive: dto.isActive,
       },
     });
   }

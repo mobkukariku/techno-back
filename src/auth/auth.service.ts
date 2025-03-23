@@ -23,7 +23,7 @@ export class AuthService {
     return bcrypt.compare(password, hashedPassword);
   }
 
-   generateToken(userId: string, role: string) {
+  generateToken(userId: string, role: string) {
     return this.jwtService.sign({ userId, role }, { expiresIn: '7d' });
   }
 
@@ -80,7 +80,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    const token = await this.generateToken(user.id, user.role);
+    const token = this.generateToken(user.id, user.role);
 
     return {
       message: 'Login successful',

@@ -4,9 +4,12 @@ import * as express from 'express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
 import { join } from 'path';
+import * as dotenv from 'dotenv';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  dotenv.config();
 
   const config = new DocumentBuilder()
     .setTitle('Technopark Backend API')
