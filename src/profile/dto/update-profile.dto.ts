@@ -1,27 +1,29 @@
-import {
-  IsArray,
-  IsEnum,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  IsUUID,
-} from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { IsEnum, IsOptional, IsString, IsUUID } from 'class-validator';
 import { MemberRole } from '@prisma/client';
 
 export class UpdateProfileDto {
-  @IsString()
+  @ApiPropertyOptional({
+    example: '750e8400-e29b-41d4-a716-446655440000',
+    description: 'User ID',
+  })
   @IsOptional()
   @IsUUID()
   userId?: string;
 
-
+  @ApiPropertyOptional({
+    example: MemberRole.member,
+    description: 'Updated position',
+  })
   @IsOptional()
-  @IsOptional()
-  @IsEnum(MemberRole)
+  @IsEnum(MemberRole, { message: 'Invalid role' })
   position?: MemberRole;
 
-  @IsString()
+  @ApiPropertyOptional({
+    example: 'Updated description',
+    description: 'New profile description',
+  })
   @IsOptional()
-  @IsNotEmpty()
+  @IsString()
   description?: string;
 }

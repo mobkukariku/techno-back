@@ -1,10 +1,4 @@
-import { IsEnum, IsString } from 'class-validator';
-import { ContactType } from '@prisma/client';
+import { PartialType } from '@nestjs/swagger';
+import { CreateContactDto } from './create-contacts.dto';
 
-export class UpdateContactDto {
-  @IsEnum(ContactType, { each: true })
-  type?: ContactType;
-
-  @IsString()
-  value?: string;
-}
+export class UpdateContactDto extends PartialType(CreateContactDto) {}

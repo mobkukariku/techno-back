@@ -55,6 +55,16 @@ export class DepartmentsService {
     });
   }
   async update(id: string, dto: UpdateDepartmentDto) {
+    if (dto.parentDepartmentId) {
+      const isCyclic = await this.checkForCyclicHierarchy(
+        id,
+        dto.parentDepartmentId,
+      );
+      if (isCyclic) {
+        throw new Error('Cyclic hierarchy detected');
+      }
+    }
+
     const updatedDepartment = await this.prisma.department.update({
       where: { id },
       data: dto,
@@ -139,5 +149,28 @@ export class DepartmentsService {
     });
 
     return rootDepartments;
+  }
+
+  private async checkForCyclicHierarchy(
+    departmentId: string,
+    newParentId: string,
+  ): Promise<boolean> {
+    let currentParentId: string | null = newParentId;
+
+    while (currentParentId !== null) {
+      if (currentParentId === departmentId) {
+        return true;
+      }
+
+      const parent = await this.prisma.department.findUnique({
+        where: { id: currentParentId },
+        select: { parentDepartmentId: true },
+      });
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
+      currentParentId = parent?.parentDepartmentId ?? null;
+    }
+
+    return false;
   }
 }

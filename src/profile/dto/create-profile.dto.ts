@@ -1,3 +1,4 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsEnum,
   IsNotEmpty,
@@ -9,21 +10,34 @@ import {
 import { MemberRole } from '@prisma/client';
 
 export class CreateProfileDto {
-  @IsString()
+  @ApiProperty({
+    example: '750e8400-e29b-41d4-a716-446655440000',
+    description: 'User ID',
+  })
   @IsUUID()
   userId: string;
 
-  @IsUrl()
+  @ApiPropertyOptional({
+    example: 'https://example.com/avatar.jpg',
+    description: 'Profile image URL',
+  })
   @IsOptional()
-  @IsNotEmpty()
+  @IsUrl({}, { message: 'Invalid image URL' })
   imageURL?: string;
 
-  @IsEnum(MemberRole)
+  @ApiPropertyOptional({
+    example: MemberRole.head,
+    description: 'User position',
+  })
   @IsOptional()
+  @IsEnum(MemberRole, { message: 'Invalid role' })
   position?: MemberRole;
 
-  @IsString()
+  @ApiPropertyOptional({
+    example: 'Experienced software developer',
+    description: 'Profile description',
+  })
   @IsOptional()
-  @IsNotEmpty()
+  @IsString()
   description?: string;
 }

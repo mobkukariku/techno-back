@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateContactDto } from './dto/create-contacts.dto';
+import { UpdateContactDto } from './dto/update-contacts.dto';
 
 @Injectable()
 export class ContactsService {
@@ -20,6 +21,15 @@ export class ContactsService {
     return this.prisma.contact.findMany({
       where: {
         userId: userId,
+      },
+    });
+  }
+
+  async update(id: string, dto: UpdateContactDto) {
+    return this.prisma.contact.update({
+      where: { id },
+      data: {
+        ...dto,
       },
     });
   }
