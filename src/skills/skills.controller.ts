@@ -16,6 +16,10 @@ export class SkillsController {
   findOne(@Param('id') id: string) {
     return this.skillsService.findOne(id);
   }
+  @Get('user/:userId')
+  findByUser(@Param('userId') userId: string) {
+    return this.skillsService.findByUser(userId);
+  }
 
   @Post()
   create(@Body() createSkillDto: CreateSkillDto) {
@@ -30,9 +34,9 @@ export class SkillsController {
   @Post('assign')
   assignSkill(
     @Body('userId') userId: string,
-    @Body('skillId') skillId: string,
+    @Body('skillName') skillName: string,
   ) {
-    return this.skillsService.assignSkillToProfile(userId, skillId);
+    return this.skillsService.assignSkillToProfile(userId, skillName);
   }
 
   @Delete('remove')

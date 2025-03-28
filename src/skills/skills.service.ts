@@ -30,6 +30,20 @@ export class SkillsService {
     return skill;
   }
 
+  async findByUser(userId: string) {
+    const skills = await this.prisma.memberProfileSkill.findMany({
+      where: {
+        profile: {
+          userId: userId,
+        },
+      },
+      select: {
+        skill: true,
+      },
+    });
+    return skills.map((s) => s.skill);
+  }
+
   async remove(id: string) {
     return this.prisma.skill.delete({
       where: { id },
@@ -44,7 +58,7 @@ export class SkillsService {
     if (!profile) {
       throw new NotFoundException(`Profile for user ${userId} not found`);
     }
-    let skill = await this.prisma.skill.findUnique({
+    let skill = await this.prisma.skill.findFirst({
       where: { name: skillName },
     });
 

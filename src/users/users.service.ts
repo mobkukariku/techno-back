@@ -56,6 +56,7 @@ export class UsersService {
           select: {
             imageURL: true,
             position: true,
+            skills: true,
           },
         },
       },
