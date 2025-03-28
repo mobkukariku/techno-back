@@ -16,15 +16,14 @@ jobs:
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/github-actions
+          chmod 600 ~/.ssh/github-actions
           ssh-keyscan -H 91.243.71.68 >> ~/.ssh/known_hosts
           echo "Host 91.243.71.68\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
 
-
       - name: Deploy to Server
         run: |
-          ssh -i ~/.ssh/id_rsa root@91.243.71.68 << 'EOF'
+          ssh -i ~/.ssh/github-actions root@91.243.71.68 << 'EOF'
             cd /path/to/your/project
             git pull origin main
             docker compose up -d --build
