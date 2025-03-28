@@ -22,7 +22,7 @@ jobs:
 
       - name: Deploy to Server
         run: |
-          ssh -i ~/.ssh/id_rsa user@${{ secrets.SERVER_IP }} << 'EOF'
+          ssh -i ~/.ssh/id_rsa root@${{ secrets.SERVER_IP }} << 'EOF'
             cd /path/to/your/project
             git pull origin main
             docker compose up -d --build
