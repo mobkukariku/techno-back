@@ -13,13 +13,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Debug SSH Key
-        run: |
-          ls -la ~/.ssh
-          cat ~/.ssh/github-actions
-          ssh -i ~/.ssh/github-actions root@91.243.71.68 "echo 'SSH Connected!'"
-
-
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
@@ -27,6 +20,12 @@ jobs:
           chmod 600 ~/.ssh/github-actions
           ssh-keyscan -H 91.243.71.68 >> ~/.ssh/known_hosts
           echo "Host 91.243.71.68\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+
+      - name: Debug SSH Key
+        run: |
+          ls -la ~/.ssh
+          cat ~/.ssh/github-actions
+          ssh -vvv -i ~/.ssh/github-actions root@91.243.71.68 "echo 'SSH Connected!'"
 
       - name: Deploy to Server
         run: |
