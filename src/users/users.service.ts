@@ -34,8 +34,20 @@ export class UsersService {
     });
   }
 
-  async getAllUsersMembers() {
+  async getAllUsersMembers(search?: string) {
     return this.prisma.user.findMany({
+      where: search
+        ? {
+            OR: [
+              { name: { contains: search, mode: 'insensitive' } },
+              {
+                memberProfile: {
+                  position: { contains: search, mode: 'insensitive' },
+                },
+              },
+            ],
+          }
+        : undefined,
       select: {
         id: true,
         name: true,
@@ -87,7 +99,6 @@ export class UsersService {
           select: {
             imageURL: true,
             position: true,
-            skills: true,
             description: true,
           },
         },

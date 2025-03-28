@@ -35,19 +35,14 @@ export class ProfileService {
     updateProfileDto: UpdateProfileDto,
     file?: Express.Multer.File,
   ) {
-    // Проверяем, есть ли профиль с таким userId
     const profile = await this.prisma.memberProfile.findUnique({
       where: { userId: id },
     });
 
-    if (!profile) {
-      throw new NotFoundException(`Профиль с userId=${id} не найден.`);
-    }
-
-    let imageURL = profile.imageURL;
+    let imageURL = profile?.imageURL;
 
     if (file) {
-      if (profile.imageURL) {
+      if (profile?.imageURL) {
         const oldImagePath = path.join(
           'images/profiles',
           path.basename(profile.imageURL),
@@ -58,13 +53,37 @@ export class ProfileService {
       }
       imageURL = `http://localhost:4000/images/profiles/${file.filename}`;
     }
-    return this.prisma.memberProfile.update({
-      where: { userId: id }, // 🔥 Тут тоже userId
-      data: {
-        ...updateProfileDto,
-        imageURL,
-      },
+
+    return this.prisma.$transaction(async (prisma) => {
+      // Обновляем имя в `User`, если оно передано
+      if (updateProfileDto.name) {
+        await prisma.user.update({
+          where: { id },
+          data: { name: updateProfileDto.name },
+        });
+      }
+
+      if (!profile) {
+        // Если профиля нет, создаем его
+        return prisma.memberProfile.create({
+          data: {
+            userId: id,
+            imageURL,
+            position: updateProfileDto.position,
+            description: updateProfileDto.description,
+          },
+        });
+      }
+
+      // Если профиль уже есть, обновляем его
+      return prisma.memberProfile.update({
+        where: { userId: id },
+        data: {
+          imageURL,
+          position: updateProfileDto.position,
+          description: updateProfileDto.description,
+        },
+      });
     });
   }
-
 }

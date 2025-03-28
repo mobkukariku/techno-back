@@ -1,10 +1,9 @@
-import { Body, Controller, Get, Param, Patch, Query, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Req, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { AuthGuard } from '../guards';
 import { RolesGuard } from '../guards';
 import { Roles } from '../decorators/roles.decorator';
 import { AuthRequest } from '../auth/auth-request.interface';
-import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('users')
 export class UsersController {
@@ -13,8 +12,8 @@ export class UsersController {
   @Get()
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('admin')
-  async getAllUsers(@Query('search') search?: string) {
-    return this.usersService.getAllUsers(search);
+  async getAllUsers() {
+    return this.usersService.getAllUsers();
   }
 
   @Get('/read')
@@ -31,12 +30,5 @@ export class UsersController {
   @Get('/:id')
   async getUserById(@Param('id') id: string) {
     return this.usersService.getUserById(id);
-  }
-
-  @Patch('/:id')
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles('admin')
-  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.updateUser(id, updateUserDto);
   }
 }

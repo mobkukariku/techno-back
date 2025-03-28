@@ -33,4 +33,10 @@ export class ContactsService {
       },
     });
   }
+
+  async delete(id: string) {
+    return this.prisma.contact.delete({
+      where: { id },
+    });
+  }
 }

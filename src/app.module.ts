@@ -11,6 +11,7 @@ import { DirectionsModule } from './directions/directions.module';
 import { MembersModule } from './members/members.module';
 import { WorkexperienceModule } from './workexperience/workexperience.module';
 import { ContactsModule } from './contacts/contacts.module';
+import { SkillsModule } from './skills/skills.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { ContactsModule } from './contacts/contacts.module';
     MembersModule,
     WorkexperienceModule,
     ContactsModule,
+    SkillsModule,
   ],
   controllers: [],
   providers: [],
