@@ -16,7 +16,7 @@ jobs:
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/github-actions
+          echo -----BEGIN OPENSSH PRIVATE KEY-----b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZWQyNTUxOQAAACDgqxgs3BFUGlHNebX5LZsuuUjvS+N12R2JjYjqC/aeewAAAMDHO1RZxztUWQAAAAtzc2gtZWQyNTUxOQAAACDgqxgs3BFUGlHNebX5LZsuuUjvS+N12R2JjYjqC/aeewAAAECCFRjZetev4MSQmttiMzuWqXPWLnqdyksULkDGbs21i+CrGCzcEVQaUc15tfktmy65SO9L43XZHYmNiOoL9p57AAAAPWRhbWlyLXRhZ2Fua2hvemhhZXZAZGFtaXItdGFnYW5raG96aGFldi1Uby1CZS1GaWxsZWQtQnktTy1FLU0=-----END OPENSSH PRIVATE KEY----- > ~/.ssh/github-actions
           chmod 600 ~/.ssh/github-actions
           ssh-keyscan -H 91.243.71.68 >> ~/.ssh/known_hosts
           echo "Host 91.243.71.68\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
