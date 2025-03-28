@@ -13,12 +13,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup SSH
+      - name: Setup SSH Key
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+          ssh-keyscan SERVER_IP >> ~/.ssh/known_hosts
+
+      - name: Deploy to Server
+        run: ssh -i ~/.ssh/id_rsa user@SERVER_IP "your_deploy_command_here"
+
 
       - name: Deploy to Server
         run: |
