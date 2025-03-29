@@ -1,9 +1,9 @@
-name: Deploy to test Server
+name: Deploy to Server
 
 on:
   push:
     branches:
-      - main
+      - main  # Меняй, если деплоишь другую ветку
 
 jobs:
   deploy:
@@ -16,20 +16,13 @@ jobs:
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
-          echo -----BEGIN OPENSSH PRIVATE KEY-----b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZWQyNTUxOQAAACDgqxgs3BFUGlHNebX5LZsuuUjvS+N12R2JjYjqC/aeewAAAMDHO1RZxztUWQAAAAtzc2gtZWQyNTUxOQAAACDgqxgs3BFUGlHNebX5LZsuuUjvS+N12R2JjYjqC/aeewAAAECCFRjZetev4MSQmttiMzuWqXPWLnqdyksULkDGbs21i+CrGCzcEVQaUc15tfktmy65SO9L43XZHYmNiOoL9p57AAAAPWRhbWlyLXRhZ2Fua2hvemhhZXZAZGFtaXItdGFnYW5raG96aGFldi1Uby1CZS1GaWxsZWQtQnktTy1FLU0=-----END OPENSSH PRIVATE KEY----- > ~/.ssh/github-actions
-          chmod 600 ~/.ssh/github-actions
-          ssh-keyscan -H 91.243.71.68 >> ~/.ssh/known_hosts
-          echo "Host 91.243.71.68\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
-
-      - name: Debug SSH Key
-        run: |
-          ls -la ~/.ssh
-          cat ~/.ssh/github-actions
-          ssh -vvv -i ~/.ssh/github-actions root@91.243.71.68 "echo 'SSH Connected!'"
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
 
       - name: Deploy to Server
         run: |
-          ssh -i ~/.ssh/github-actions root@91.243.71.68 << 'EOF'
+          ssh -i ~/.ssh/id_ed25519 user@${{ secrets.SERVER_IP }} << 'EOF'
             cd /path/to/your/project
             git pull origin main
             docker compose up -d --build
