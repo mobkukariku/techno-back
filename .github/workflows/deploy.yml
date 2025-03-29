@@ -20,6 +20,10 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
 
+      - name: Debug SSH Keys
+        run: ssh -i ~/.ssh/id_ed25519 -vvv root@${{ secrets.SERVER_IP }} exit
+
+
       - name: Deploy to Server
         run: |
           ssh -i ~/.ssh/id_ed25519 root@${{ secrets.SERVER_IP }} << 'EOF'
