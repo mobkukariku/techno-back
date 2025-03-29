@@ -27,7 +27,7 @@ jobs:
       - name: Deploy to Server
         run: |
           ssh -i ~/.ssh/id_ed25519 root@${{ secrets.SERVER_IP }} << 'EOF'
-            cd /path/to/your/project
+            cd /var/www/techno-back/techno-back
             git pull origin main
             docker compose up -d --build
           EOF
