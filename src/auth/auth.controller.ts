@@ -15,7 +15,7 @@ export class AuthController {
       sameSite: 'none',
     });
     res.cookie('role', role, {
-      httpOnly: false,
+      httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'none',
     });
