@@ -11,13 +11,13 @@ export class AuthController {
   private setAuthCookies(res: Response, token: string, role: string) {
     res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none',
+      secure: false,
+      sameSite: 'lax',
     });
     res.cookie('role', role, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none',
+      secure: false,
+      sameSite: 'lax',
     });
   }
 
