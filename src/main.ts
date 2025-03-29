@@ -24,8 +24,8 @@ async function bootstrap() {
   app.use('/images', express.static(join(__dirname, '..', 'images')));
 
   app.enableCors({
-    origin: process.env.CLIENT_URL,
-    credentials: true,
+    origin: 'http://localhost:3000',
+    credentials: true, // Разрешить передачу куков
   });
 
   const document = SwaggerModule.createDocument(app, config);

@@ -13,8 +13,8 @@ export class AuthController {
 
     res.cookie('token', token, {
       httpOnly: true,
-      secure: !isDev, // Secure = true только если HTTPS
-      sameSite: isDev ? 'lax' : 'none', // "none" только для HTTPS
+      secure: !isDev, // Secure=true только для HTTPS
+      sameSite: isDev ? 'lax' : 'none', // "none" требует HTTPS, но для локалки оставляем "lax"
     });
 
     res.cookie('role', role, {
