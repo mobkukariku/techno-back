@@ -9,7 +9,7 @@ COPY . .
 
 EXPOSE 3000 9229
 
-
+CMD ["npx", "prisma", "migrate", "dev"]
 CMD ["npm", "run", "start:dev"]
 
 EXPOSE 5000

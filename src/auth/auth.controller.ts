@@ -9,16 +9,18 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   private setAuthCookies(res: Response, token: string, role: string) {
+    const isDev = process.env.NODE_ENV !== 'production';
+
     res.cookie('token', token, {
       httpOnly: true,
-      secure: true, // Должно быть всегда true для SameSite=None
-      sameSite: 'none', // Требует Secure=true
+      secure: !isDev,
+      sameSite: isDev ? 'lax' : 'none',
     });
 
     res.cookie('role', role, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'none',
+      secure: !isDev,
+      sameSite: isDev ? 'lax' : 'none',
     });
   }
 
