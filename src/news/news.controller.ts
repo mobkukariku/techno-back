@@ -61,7 +61,7 @@ export class NewsController {
     @Body() dto: CreateNewsDto,
   ) {
     const imageURL = file
-      ? `http://localhost:4000/images/news/${file.filename}`
+      ? `http://localhost:5000/images/news/${file.filename}`
       : null;
 
     return this.newsService.createNews(request, {

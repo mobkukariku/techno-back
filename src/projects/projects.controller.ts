@@ -62,7 +62,7 @@ export class ProjectsController {
   ) {
     const imageUrls =
       files?.images?.map(
-        (file) => `http://localhost:4000/images/projects/${file.filename}`,
+        (file) => `http://localhost:5000/images/projects/${file.filename}`,
       ) || [];
 
     return this.projectsService.createProject(dto, imageUrls);
