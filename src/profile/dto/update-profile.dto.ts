@@ -1,3 +1,4 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsEnum,
   IsNotEmpty,
@@ -8,21 +9,23 @@ import {
 import { MemberRole } from '@prisma/client';
 
 export class UpdateProfileDto {
+  @ApiPropertyOptional({ description: 'User name' })
   @IsOptional()
   @IsString()
   name?: string;
 
+  @ApiPropertyOptional({ description: 'Unique user identifier', format: 'uuid' })
   @IsString()
   @IsOptional()
   @IsUUID()
   userId?: string;
 
-
-  @IsOptional()
+  @ApiPropertyOptional({ description: 'User role', enum: MemberRole })
   @IsOptional()
   @IsEnum(MemberRole)
   position?: MemberRole;
 
+  @ApiPropertyOptional({ description: 'Profile description' })
   @IsString()
   @IsOptional()
   @IsNotEmpty()
