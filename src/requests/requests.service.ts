@@ -1,10 +1,15 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateRequestsDto, CreateProjectPartnershipDto, CreateJobApplicationDto } from './dto';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { CloudinaryResponse, CloudinaryResourceType } from '../cloudinary/cloudinary-response.interface';
 
 @Injectable()
 export class RequestsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private cloudinaryService: CloudinaryService
+  ) {}
 
   async createRequest(dto: CreateRequestsDto) {
     const { name, email, message, direction } = dto;
@@ -30,11 +35,29 @@ export class RequestsService {
     try {
       const { title, description, senderName, email } = dto;
 
-      const attachmentPaths = attachments.map(file => ({
-        path: file.path,
-        originalName: file.originalname,
-        mimeType: file.mimetype,
-        size: file.size
+      const uploadedFiles = await Promise.all(
+        attachments.map(file => {
+          let resourceType: CloudinaryResourceType = 'auto';
+          
+          if (file.mimetype.startsWith('image/')) {
+            resourceType = 'image';
+          } else if (file.mimetype === 'application/pdf' || 
+                    file.mimetype.includes('word') || 
+                    file.mimetype.includes('excel') || 
+                    file.mimetype.includes('powerpoint')) {
+            resourceType = 'raw';
+          }
+          
+          return this.cloudinaryService.uploadFile(file, 'partnership-attachments', resourceType);
+        })
+      );
+
+      const attachmentData = uploadedFiles.map((result: CloudinaryResponse) => ({
+        path: result.secure_url,
+        originalName: result.original_filename,
+        mimeType: result.format ? `image/${result.format}` : 'application/octet-stream',
+        size: result.bytes,
+        publicId: result.public_id
       }));
 
       return this.prisma.$transaction(async (tx) => {
@@ -47,9 +70,9 @@ export class RequestsService {
           }
         });
 
-        if (attachments.length > 0) {
+        if (attachmentData.length > 0) {
           await (tx as any).partnershipAttachment.createMany({
-            data: attachmentPaths.map(attachment => ({
+            data: attachmentData.map(attachment => ({
               ...attachment,
               requestId: partnership.id
             }))
@@ -58,7 +81,7 @@ export class RequestsService {
 
         return {
           ...partnership,
-          attachments: attachments.length > 0 
+          attachments: attachmentData.length > 0 
             ? await (tx as any).partnershipAttachment.findMany({
                 where: { requestId: partnership.id }
               }) 
@@ -78,18 +101,35 @@ export class RequestsService {
   ) {
     try {
       const { fullName, email, telegramUsername } = dto;
+      
+      const cvUpload = await this.cloudinaryService.uploadFile(
+        cv, 
+        'job-applications/cv', 
+        'raw'
+      ) as CloudinaryResponse;
+      
+      let coverLetterUpload: CloudinaryResponse | null = null;
+      if (coverLetter) {
+        coverLetterUpload = await this.cloudinaryService.uploadFile(
+          coverLetter, 
+          'job-applications/cover-letters', 
+          'raw'
+        );
+      }
 
       return (this.prisma as any).jobApplicationRequest.create({
         data: {
           fullName,
           email,
           telegramUsername,
-          cvPath: cv.path,
-          cvOriginalName: cv.originalname,
-          cvSize: cv.size,
-          coverLetterPath: coverLetter?.path || null,
-          coverLetterOriginalName: coverLetter?.originalname || null,
-          coverLetterSize: coverLetter?.size || null,
+          cvPath: cvUpload.secure_url,
+          cvOriginalName: cvUpload.original_filename,
+          cvSize: cvUpload.bytes,
+          cvPublicId: cvUpload.public_id,
+          coverLetterPath: coverLetterUpload?.secure_url || null,
+          coverLetterOriginalName: coverLetterUpload?.original_filename || null,
+          coverLetterSize: coverLetterUpload?.bytes || null,
+          coverLetterPublicId: coverLetterUpload?.public_id || null,
         }
       });
     } catch (error) {

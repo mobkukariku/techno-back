@@ -1,89 +1,250 @@
-import { Body, Controller, Get, Post, UploadedFiles, UseInterceptors, BadRequestException } from '@nestjs/common';
-import { RequestsService } from './requests.service';
-import { CreateProjectPartnershipDto, CreateJobApplicationDto } from './dto';
-import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
-import { v4 as uuidv4 } from 'uuid';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  UploadedFiles,
+  UseInterceptors,
+  BadRequestException,
+} from "@nestjs/common";
+import { RequestsService } from "./requests.service";
+import { CreateProjectPartnershipDto, CreateJobApplicationDto } from "./dto";
+import { FileFieldsInterceptor } from "@nestjs/platform-express";
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiConsumes,
+  ApiBody,
+  ApiBadRequestResponse,
+} from "@nestjs/swagger";
 
-@Controller('requests')
+@ApiTags("requests")
+@Controller("requests")
 export class RequestsController {
   constructor(private readonly requestsService: RequestsService) {}
 
-  @Get('partnership')
+  @Get("partnership")
+  @ApiResponse({
+    status: 200,
+    description: "List of partnership requests retrieved successfully",
+    schema: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          id: { type: "string", format: "uuid" },
+          title: { type: "string" },
+          description: { type: "string" },
+          senderName: { type: "string" },
+          email: { type: "string", format: "email" },
+          createdAt: { type: "string", format: "date-time" },
+          updatedAt: { type: "string", format: "date-time" },
+          attachments: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                id: { type: "string", format: "uuid" },
+                path: { type: "string" },
+                originalName: { type: "string" },
+                mimeType: { type: "string" },
+                size: { type: "number" },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
   async getAllPartnershipRequests() {
     return this.requestsService.getAllPartnershipRequests();
   }
 
-  @Get('job-application')
+  @Get("job-application")
+  @ApiResponse({
+    status: 200,
+    description: "List of job applications retrieved successfully",
+    schema: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          id: { type: "string", format: "uuid" },
+          fullName: { type: "string" },
+          email: { type: "string", format: "email" },
+          telegramUsername: { type: "string" },
+          cvPath: { type: "string" },
+          cvOriginalName: { type: "string" },
+          cvSize: { type: "number" },
+          coverLetterPath: { type: "string", nullable: true },
+          coverLetterOriginalName: { type: "string", nullable: true },
+          coverLetterSize: { type: "number", nullable: true },
+          createdAt: { type: "string", format: "date-time" },
+          updatedAt: { type: "string", format: "date-time" },
+        },
+      },
+    },
+  })
   async getAllJobApplications() {
     return this.requestsService.getAllJobApplications();
   }
 
-  @Post('partnership')
-  @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: 'attachments', maxCount: 5 },
-    ], {
-      storage: diskStorage({
-        destination: './uploads/partnership',
-        filename: (req, file, cb) => {
-          const randomName = uuidv4();
-          return cb(null, `${randomName}${extname(file.originalname)}`);
+  @Post("partnership")
+  @ApiConsumes("multipart/form-data")
+  @ApiBody({
+    schema: {
+      type: "object",
+      required: ["title", "description", "senderName", "email"],
+      properties: {
+        title: {
+          type: "string",
+          example: "Partnership Project Title",
+          description: "Title of the partnership project",
         },
-      }),
-      fileFilter: (req, file, cb) => {
-        if (!file.originalname.match(/\.(pdf|doc|docx|xls|xlsx|ppt|pptx|jpg|jpeg|png)$/)) {
-          return cb(new Error('Only document and image files are allowed!'), false);
-        }
-        cb(null, true);
+        description: {
+          type: "string",
+          example: "Detailed description of the partnership project...",
+          description: "Detailed description of the partnership project",
+        },
+        senderName: {
+          type: "string",
+          example: "John Doe",
+          description: "Name of the sender",
+        },
+        email: {
+          type: "string",
+          example: "john.doe@example.com",
+          description: "Email of the sender",
+        },
+        attachments: {
+          type: "array",
+          items: {
+            type: "string",
+            format: "binary",
+          },
+          description: "Optional project-related documents or images",
+        },
       },
-      limits: {
-        fileSize: 5 * 1024 * 1024, // 5MB
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: "Partnership request created successfully",
+    schema: {
+      type: "object",
+      properties: {
+        id: { type: "string", format: "uuid" },
+        title: { type: "string" },
+        description: { type: "string" },
+        senderName: { type: "string" },
+        email: { type: "string", format: "email" },
+        createdAt: { type: "string", format: "date-time" },
+        updatedAt: { type: "string", format: "date-time" },
+        attachments: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              id: { type: "string", format: "uuid" },
+              path: { type: "string" },
+              originalName: { type: "string" },
+              mimeType: { type: "string" },
+              size: { type: "number" },
+            },
+          },
+        },
       },
-    }),
+    },
+  })
+  @ApiBadRequestResponse({ description: "Invalid input or file upload failed" })
+  @UseInterceptors(
+    FileFieldsInterceptor([{ name: "attachments", maxCount: 5 }])
   )
   async createPartnershipRequest(
     @Body() dto: CreateProjectPartnershipDto,
     @UploadedFiles() files: { attachments?: Express.Multer.File[] }
   ) {
-    return this.requestsService.createPartnershipRequest(dto, files?.attachments || []);
+    return this.requestsService.createPartnershipRequest(
+      dto,
+      files?.attachments || []
+    );
   }
 
-  @Post('job-application')
+  @Post("job-application")
+  @ApiConsumes("multipart/form-data")
+  @ApiBody({
+    schema: {
+      type: "object",
+      required: ["fullName", "email", "telegramUsername", "cv"],
+      properties: {
+        fullName: {
+          type: "string",
+          example: "Jane Smith",
+          description: "Full name of the applicant",
+        },
+        email: {
+          type: "string",
+          example: "jane.smith@example.com",
+          description: "Email address of the applicant",
+        },
+        telegramUsername: {
+          type: "string",
+          example: "@janesmith",
+          description: "Telegram username (must start with @)",
+        },
+        cv: {
+          type: "string",
+          format: "binary",
+          description: "CV/Resume document (required)",
+        },
+        coverLetter: {
+          type: "string",
+          format: "binary",
+          description: "Cover letter document (optional)",
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: "Job application submitted successfully",
+    schema: {
+      type: "object",
+      properties: {
+        id: { type: "string", format: "uuid" },
+        fullName: { type: "string" },
+        email: { type: "string", format: "email" },
+        telegramUsername: { type: "string" },
+        cvPath: { type: "string" },
+        cvOriginalName: { type: "string" },
+        cvSize: { type: "number" },
+        coverLetterPath: { type: "string", nullable: true },
+        coverLetterOriginalName: { type: "string", nullable: true },
+        coverLetterSize: { type: "number", nullable: true },
+        createdAt: { type: "string", format: "date-time" },
+        updatedAt: { type: "string", format: "date-time" },
+      },
+    },
+  })
+  @ApiBadRequestResponse({ description: "Invalid input or CV file missing" })
   @UseInterceptors(
     FileFieldsInterceptor([
-      { name: 'cv', maxCount: 1 },
-      { name: 'coverLetter', maxCount: 1 },
-    ], {
-      storage: diskStorage({
-        destination: './uploads/job-applications',
-        filename: (req, file, cb) => {
-          const randomName = uuidv4();
-          return cb(null, `${randomName}${extname(file.originalname)}`);
-        },
-      }),
-      fileFilter: (req, file, cb) => {
-        if (!file.originalname.match(/\.(pdf|doc|docx)$/)) {
-          return cb(new Error('Only PDF and Word documents are allowed!'), false);
-        }
-        cb(null, true);
-      },
-      limits: {
-        fileSize: 3 * 1024 * 1024, // 3MB
-      },
-    }),
+      { name: "cv", maxCount: 1 },
+      { name: "coverLetter", maxCount: 1 },
+    ])
   )
   async createJobApplication(
     @Body() dto: CreateJobApplicationDto,
-    @UploadedFiles() files: { cv?: Express.Multer.File[], coverLetter?: Express.Multer.File[] }
+    @UploadedFiles()
+    files: { cv?: Express.Multer.File[]; coverLetter?: Express.Multer.File[] }
   ) {
     if (!files.cv || files.cv.length === 0) {
-      throw new BadRequestException('CV file is required');
+      throw new BadRequestException("CV file is required");
     }
     return this.requestsService.createJobApplication(
-      dto, 
-      files.cv[0], 
+      dto,
+      files.cv[0],
       files.coverLetter?.[0] || null
     );
   }

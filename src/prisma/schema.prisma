@@ -255,6 +255,7 @@ model PartnershipAttachment {
   originalName              String
   mimeType                  String
   size                      Int
+  publicId                  String?                 
   projectPartnershipRequest ProjectPartnershipRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
   requestId                 String
 
@@ -262,18 +263,20 @@ model PartnershipAttachment {
 }
 
 model JobApplicationRequest {
-  id                     String   @id @default(uuid())
-  fullName               String
-  email                  String
-  telegramUsername       String
-  cvPath                 String
-  cvOriginalName         String
-  cvSize                 Int
-  coverLetterPath        String?
-  coverLetterOriginalName String?
-  coverLetterSize        Int?
-  createdAt              DateTime @default(now())
-  updatedAt              DateTime @updatedAt
+  id                       String   @id @default(uuid())
+  fullName                 String
+  email                    String
+  telegramUsername         String
+  cvPath                   String
+  cvOriginalName           String
+  cvSize                   Int
+  cvPublicId               String?  
+  coverLetterPath          String?
+  coverLetterOriginalName  String?
+  coverLetterSize          Int?
+  coverLetterPublicId      String? 
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
 
   @@map("job_application_requests")
 }
