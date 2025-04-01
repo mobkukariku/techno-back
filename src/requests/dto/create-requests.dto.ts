@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, IsUUID } from 'class-validator';
 
 export class CreateRequestsDto {
   @ApiProperty({ description: 'Requester name' })
@@ -19,6 +19,6 @@ export class CreateRequestsDto {
 
   @ApiProperty({ description: 'Request direction' })
   @IsNotEmpty({ message: 'Direction cannot be empty' })
-  @IsString({ message: 'Direction must be a string' }) // Since Prisma Direction is a string
+  @IsUUID('4', { message: 'Direction must be a valid UUID' })
   direction: string;
 }
