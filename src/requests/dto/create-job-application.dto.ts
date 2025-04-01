@@ -1,5 +1,5 @@
-import { IsEmail, IsNotEmpty, IsString, Length, Matches } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsEmail, IsNotEmpty, IsOptional, IsString, IsUUID, Length, Matches } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateJobApplicationDto {
   @ApiProperty({ 
@@ -32,4 +32,12 @@ export class CreateJobApplicationDto {
     message: 'Telegram username must be in format @username',
   })
   telegramUsername: string;
+  
+  @ApiPropertyOptional({
+    description: 'Job role the applicant is applying for',
+    example: 'Software Engineer',
+  })
+  @IsOptional()
+  @IsUUID()
+  jobRoleId?: string;
 }

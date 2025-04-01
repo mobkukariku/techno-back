@@ -267,6 +267,8 @@ model JobApplicationRequest {
   fullName                 String
   email                    String
   telegramUsername         String
+  jobRoleId                String?
+  jobRole                  JobRole? @relation(fields: [jobRoleId], references: [id])
   cvPath                   String
   cvOriginalName           String
   cvSize                   Int
@@ -279,6 +281,17 @@ model JobApplicationRequest {
   updatedAt                DateTime @updatedAt
 
   @@map("job_application_requests")
+}
+
+model JobRole {
+  id          String                @id @default(uuid())
+  name        String                @unique
+  isActive    Boolean               @default(true)
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  applications JobApplicationRequest[]
+
+  @@map("job_roles")
 }
 
 model Direction {

@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateRequestsDto, CreateProjectPartnershipDto, CreateJobApplicationDto } from './dto';
+import { CreateRequestsDto, CreateProjectPartnershipDto, CreateJobApplicationDto, CreateJobRoleDto, UpdateJobRoleDto } from './dto';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { CloudinaryResponse, CloudinaryResourceType } from '../cloudinary/cloudinary-response.interface';
 
@@ -100,7 +100,7 @@ export class RequestsService {
     coverLetter: Express.Multer.File | null
   ) {
     try {
-      const { fullName, email, telegramUsername } = dto;
+      const { fullName, email, telegramUsername, jobRoleId } = dto;
       
       const cvUpload = await this.cloudinaryService.uploadFile(
         cv, 
@@ -122,6 +122,7 @@ export class RequestsService {
           fullName,
           email,
           telegramUsername,
+          jobRoleId: jobRoleId || null,
           cvPath: cvUpload.secure_url,
           cvOriginalName: cvUpload.original_filename,
           cvSize: cvUpload.bytes,
@@ -130,6 +131,9 @@ export class RequestsService {
           coverLetterOriginalName: coverLetterUpload?.original_filename || null,
           coverLetterSize: coverLetterUpload?.bytes || null,
           coverLetterPublicId: coverLetterUpload?.public_id || null,
+        },
+        include: {
+          jobRole: true
         }
       });
     } catch (error) {
@@ -164,6 +168,115 @@ export class RequestsService {
     } catch (error) {
       console.error('Get job applications error:', error);
       throw new NotFoundException('Failed to fetch job applications');
+    }
+  }
+
+  async createJobRole(dto: CreateJobRoleDto) {
+    try {
+      const { name } = dto;
+
+      return (this.prisma as any).jobRole.create({
+        data: {
+          name
+        }
+      });
+    } catch (error) {
+      console.error('Create job role error:', error);
+      if (error.code === 'P2002') {
+        throw new BadRequestException('Job role with this name already exists');
+      }
+      throw new BadRequestException('Failed to create job role: ' + error.message);
+    }
+  }
+
+  async getAllJobRoles() {
+    try {
+      return (this.prisma as any).jobRole.findMany({
+        where: {
+          isActive: true
+        },
+        orderBy: {
+          name: 'asc'
+        }
+      });
+    } catch (error) {
+      console.error('Get job roles error:', error);
+      throw new NotFoundException('Failed to fetch job roles');
+    }
+  }
+
+  async getJobRoleById(id: string) {
+    try {
+      const jobRole = await (this.prisma as any).jobRole.findUnique({
+        where: { id }
+      });
+      
+      if (!jobRole) {
+        throw new NotFoundException(`Job role with ID ${id} not found`);
+      }
+      
+      return jobRole;
+    } catch (error) {
+      console.error('Get job role error:', error);
+      throw new NotFoundException('Failed to fetch job role: ' + error.message);
+    }
+  }
+
+  async deleteJobRole(id: string) {
+    try {
+      const jobRole = await (this.prisma as any).jobRole.findUnique({
+        where: { id }
+      });
+      
+      if (!jobRole) {
+        throw new NotFoundException(`Job role with ID ${id} not found`);
+      }
+
+      const applicationsCount = await (this.prisma as any).jobApplicationRequest.count({
+        where: { jobRoleId: id }
+      });
+
+      if (applicationsCount > 0) {
+        return (this.prisma as any).jobRole.update({
+          where: { id },
+          data: { isActive: false }
+        });
+      } else {
+        return (this.prisma as any).jobRole.delete({
+          where: { id }
+        });
+      }
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      console.error('Delete job role error:', error);
+      throw new BadRequestException('Failed to delete job role: ' + error.message);
+    }
+  }
+
+  async updateJobRole(id: string, dto: UpdateJobRoleDto) {
+    try {
+      const { name, isActive } = dto;
+      
+      const jobRole = await (this.prisma as any).jobRole.findUnique({
+        where: { id }
+      });
+      
+      if (!jobRole) {
+        throw new NotFoundException(`Job role with ID ${id} not found`);
+      }
+      
+      return (this.prisma as any).jobRole.update({
+        where: { id },
+        data: {
+          name,
+          isActive
+        }
+      });
+    } catch (error) {
+      console.error('Update job role error:', error);
+      throw new BadRequestException('Failed to update job role: ' + error.message);
     }
   }
 }

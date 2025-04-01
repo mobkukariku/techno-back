@@ -3,12 +3,15 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
+  Param,
+  Delete,
   UploadedFiles,
   UseInterceptors,
   BadRequestException,
 } from "@nestjs/common";
 import { RequestsService } from "./requests.service";
-import { CreateProjectPartnershipDto, CreateJobApplicationDto } from "./dto";
+import { CreateProjectPartnershipDto, CreateJobApplicationDto, CreateJobRoleDto, UpdateJobRoleDto } from "./dto";
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import {
   ApiTags,
@@ -16,6 +19,7 @@ import {
   ApiResponse,
   ApiConsumes,
   ApiBody,
+  ApiParam,
   ApiBadRequestResponse,
 } from "@nestjs/swagger";
 
@@ -193,6 +197,12 @@ export class RequestsController {
           example: "@janesmith",
           description: "Telegram username (must start with @)",
         },
+        jobRoleId: {
+          type: "string",
+          format: "uuid",
+          example: "550e8400-e29b-41d4-a716-446655440000",
+          description: "ID of the job role the applicant is applying for (optional)",
+        },
         cv: {
           type: "string",
           format: "binary",
@@ -216,6 +226,16 @@ export class RequestsController {
         fullName: { type: "string" },
         email: { type: "string", format: "email" },
         telegramUsername: { type: "string" },
+        jobRoleId: { type: "string", format: "uuid", nullable: true },
+        jobRole: { 
+          type: "object", 
+          nullable: true,
+          properties: {
+            id: { type: "string", format: "uuid" },
+            name: { type: "string" },
+            description: { type: "string", nullable: true }
+          }
+        },
         cvPath: { type: "string" },
         cvOriginalName: { type: "string" },
         cvSize: { type: "number" },
@@ -247,5 +267,102 @@ export class RequestsController {
       files.cv[0],
       files.coverLetter?.[0] || null
     );
+  }
+
+  @Post("job-roles")
+  @ApiOperation({ summary: "Create a new job role" })
+  @ApiBody({
+    type: CreateJobRoleDto,
+    description: "Job role creation data",
+  })
+  @ApiResponse({
+    status: 201,
+    description: "Job role created successfully",
+    schema: {
+      type: "object",
+      properties: {
+        id: { type: "string", format: "uuid" },
+        name: { type: "string" },
+        isActive: { type: "boolean" },
+        createdAt: { type: "string", format: "date-time" },
+        updatedAt: { type: "string", format: "date-time" },
+      },
+    },
+  })
+  @ApiBadRequestResponse({ description: "Invalid input or job role already exists" })
+  async createJobRole(@Body() dto: CreateJobRoleDto) {
+    return this.requestsService.createJobRole(dto);
+  }
+
+  @Get("job-roles")
+  @ApiOperation({ summary: "Get all active job roles" })
+  @ApiResponse({
+    status: 200,
+    description: "List of active job roles retrieved successfully",
+    schema: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          id: { type: "string", format: "uuid" },
+          name: { type: "string" },
+          isActive: { type: "boolean" },
+          createdAt: { type: "string", format: "date-time" },
+          updatedAt: { type: "string", format: "date-time" },
+        },
+      },
+    },
+  })
+  async getAllJobRoles() {
+    return this.requestsService.getAllJobRoles();
+  }
+
+  @Delete("job-roles/:id")
+  @ApiOperation({ summary: "Delete a job role" })
+  @ApiParam({ name: "id", type: "string", format: "uuid", description: "Job role ID" })
+  @ApiResponse({
+    status: 200,
+    description: "Job role deleted successfully",
+    schema: {
+      type: "object",
+      properties: {
+        id: { type: "string", format: "uuid" },
+        name: { type: "string" },
+        isActive: { type: "boolean" },
+        createdAt: { type: "string", format: "date-time" },
+        updatedAt: { type: "string", format: "date-time" },
+      },
+    },
+  })
+  @ApiResponse({ status: 404, description: "Job role not found" })
+  async deleteJobRole(@Param("id") id: string) {
+    return this.requestsService.deleteJobRole(id);
+  }
+
+  @Patch("job-roles/:id")
+  @ApiOperation({ summary: "Update a job role" })
+  @ApiParam({ name: "id", type: "string", format: "uuid", description: "Job role ID" })
+  @ApiBody({
+    type: UpdateJobRoleDto,
+    description: "Job role update data",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Job role updated successfully",
+    schema: {
+      type: "object",
+      properties: {
+        id: { type: "string", format: "uuid" },
+        name: { type: "string" },
+        isActive: { type: "boolean" },
+        createdAt: { type: "string", format: "date-time" },
+        updatedAt: { type: "string", format: "date-time" },
+      },
+    },
+  })
+  @ApiResponse({ status: 404, description: "Job role not found" })
+  @ApiBadRequestResponse({ description: "Invalid input" })
+  async updateJobRole(@Param("id") id: string, @Body() dto: UpdateJobRoleDto) {
+    return this.requestsService.updateJobRole(id, dto);
   }
 }
