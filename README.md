@@ -8,7 +8,6 @@ A comprehensive NestJS-based backend application for managing a technology organ
 - [System Architecture](#system-architecture)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
-- [Configuration](#configuration)
 - [Running the Application](#running-the-application)
 - [Database Structure](#database-structure)
 - [API Endpoints](#api-endpoints)
@@ -19,6 +18,8 @@ A comprehensive NestJS-based backend application for managing a technology organ
   - [News](#news)
   - [Member Profiles](#member-profiles)
   - [Requests](#requests)
+    - [Job Roles Management](#job-roles-management)
+    - [Job Applications](#job-applications)
 - [Feature Details](#feature-details)
   - [Authentication and Authorization](#authentication-and-authorization)
   - [File Upload System](#file-upload-system)
@@ -77,26 +78,6 @@ $ npx prisma generate
 
 # Run database migrations
 $ npx prisma migrate dev
-```
-
-## Configuration
-
-The application can be configured using environment variables in the `.env` file:
-
-```
-# Database
-DATABASE_URL="postgresql://username:password@localhost:5432/techno_db?schema=public"
-
-# JWT
-JWT_SECRET="your-secret-key"
-JWT_EXPIRES_IN="7d"
-
-# Server
-PORT=5000
-HOST="localhost"
-
-# File Storage
-FILE_STORAGE_PATH="./uploads"
 ```
 
 ## Running the Application
@@ -309,6 +290,71 @@ The application uses PostgreSQL with Prisma ORM for database management. The mai
 - **Description**: Retrieves a paginated list of news articles
 - **Query Parameters**: Pagination and filtering options
 - **Response**: List of news articles with author and tags
+
+### Requests
+
+#### Job Roles Management
+
+##### Get All Job Roles
+- **Endpoint**: `GET /requests/job-roles`
+- **Description**: Retrieves a list of all active job roles
+- **Response**: List of job role objects
+  ```json
+  [
+    {
+      "id": "uuid",
+      "name": "Software Developer",
+      "isActive": true,
+      "createdAt": "2023-01-01T00:00:00Z",
+      "updatedAt": "2023-01-01T00:00:00Z"
+    }
+  ]
+  ```
+
+##### Create Job Role
+- **Endpoint**: `POST /requests/job-roles`
+- **Description**: Creates a new job role
+- **Request Body**:
+  ```json
+  {
+    "name": "Data Scientist"
+  }
+  ```
+- **Response**: Created job role object
+
+##### Update Job Role
+- **Endpoint**: `PATCH /requests/job-roles/:id`
+- **Description**: Updates an existing job role
+- **Parameters**:
+  - `id`: Job role UUID
+- **Request Body**:
+  ```json
+  {
+    "name": "Senior Data Scientist",
+    "isActive": true
+  }
+  ```
+- **Response**: Updated job role object
+
+##### Delete Job Role
+- **Endpoint**: `DELETE /requests/job-roles/:id`
+- **Description**: Deletes a job role or sets it as inactive if it's in use
+- **Parameters**:
+  - `id`: Job role UUID
+- **Response**: The deleted or deactivated job role object
+
+#### Job Applications
+
+- **Endpoint**: `POST /requests/job-application`
+- **Description**: Submit a job application with CV and optional cover letter
+- **Request Body**: Multipart form data including:
+  - `fullName`: Applicant's full name
+  - `email`: Applicant's email address
+  - `telegramUsername`: Applicant's Telegram username
+  - `jobRoleId`: (Optional) UUID of the job role being applied for
+  - `cv`: CV/Resume file (required)
+  - `coverLetter`: Cover letter file (optional)
+- **Response**: Created job application object with uploaded file URLs
 
 ## Feature Details
 
