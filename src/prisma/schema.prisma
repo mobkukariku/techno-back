@@ -236,6 +236,48 @@ model Requests {
   @@map("requests")
 }
 
+model ProjectPartnershipRequest {
+  id          String                     @id @default(uuid())
+  title       String
+  description String
+  senderName  String
+  email       String
+  createdAt   DateTime                   @default(now())
+  updatedAt   DateTime                   @updatedAt
+  attachments PartnershipAttachment[]
+
+  @@map("project_partnership_requests")
+}
+
+model PartnershipAttachment {
+  id                        String                  @id @default(uuid())
+  path                      String
+  originalName              String
+  mimeType                  String
+  size                      Int
+  projectPartnershipRequest ProjectPartnershipRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  requestId                 String
+
+  @@map("partnership_attachments")
+}
+
+model JobApplicationRequest {
+  id                     String   @id @default(uuid())
+  fullName               String
+  email                  String
+  telegramUsername       String
+  cvPath                 String
+  cvOriginalName         String
+  cvSize                 Int
+  coverLetterPath        String?
+  coverLetterOriginalName String?
+  coverLetterSize        Int?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  @@map("job_application_requests")
+}
+
 model Direction {
   id   String @id @default(uuid())
   name String @unique
