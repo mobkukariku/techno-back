@@ -18,6 +18,7 @@ export interface FileResponse {
 export class FileStorageService {
   private readonly logger = new Logger(FileStorageService.name);
   private readonly baseUploadDir = 'uploads';
+  private readonly baseUrl = process.env.BASE_URL || 'http://localhost:5000';
 
   constructor() {
     this.ensureDirectoryExists(this.baseUploadDir);
@@ -52,12 +53,13 @@ export class FileStorageService {
       
       await fs.writeFile(filePath, file.buffer);
       
-      const urlPath = filePath.replace(/\\/g, '/');
+      const fileUrl = `${this.baseUrl}/uploads/${relativePath.replace(/\\/g, '/')}`;
       
-      this.logger.debug(`File uploaded successfully to: ${urlPath}`);
+      this.logger.debug(`File uploaded successfully to: ${filePath}`);
+      this.logger.debug(`File accessible at URL: ${fileUrl}`);
       
       return {
-        secure_url: urlPath,
+        secure_url: fileUrl,
         public_id: relativePath.replace(/\\/g, '/'),
         original_filename: baseFilename,
         bytes: file.size,

@@ -1,10 +1,12 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateRequestsDto, CreateProjectPartnershipDto, CreateJobApplicationDto, CreateJobRoleDto, UpdateJobRoleDto } from './dto';
 import { FileStorageService, FileResponse, FileResourceType } from '../file-storage/file-storage.service';
 
 @Injectable()
 export class RequestsService {
+  private readonly logger = new Logger(RequestsService.name);
+
   constructor(
     private prisma: PrismaService,
     private fileStorageService: FileStorageService
@@ -107,6 +109,8 @@ export class RequestsService {
         'raw'
       ) as FileResponse;
       
+      this.logger.log(`CV uploaded successfully. Accessible at: ${cvUpload.secure_url}`);
+      
       let coverLetterUpload: FileResponse | null = null;
       if (coverLetter) {
         coverLetterUpload = await this.fileStorageService.uploadFile(
@@ -114,6 +118,7 @@ export class RequestsService {
           'job-applications/cover-letters', 
           'raw'
         );
+        this.logger.log(`Cover letter uploaded successfully. Accessible at: ${coverLetterUpload.secure_url}`);
       }
 
       return (this.prisma as any).jobApplicationRequest.create({
