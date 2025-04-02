@@ -1,14 +1,13 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateRequestsDto, CreateProjectPartnershipDto, CreateJobApplicationDto, CreateJobRoleDto, UpdateJobRoleDto } from './dto';
-import { CloudinaryService } from '../cloudinary/cloudinary.service';
-import { CloudinaryResponse, CloudinaryResourceType } from '../cloudinary/cloudinary-response.interface';
+import { FileStorageService, FileResponse, FileResourceType } from '../file-storage/file-storage.service';
 
 @Injectable()
 export class RequestsService {
   constructor(
     private prisma: PrismaService,
-    private cloudinaryService: CloudinaryService
+    private fileStorageService: FileStorageService
   ) {}
 
   async createRequest(dto: CreateRequestsDto) {
@@ -37,7 +36,7 @@ export class RequestsService {
 
       const uploadedFiles = await Promise.all(
         attachments.map(file => {
-          let resourceType: CloudinaryResourceType = 'auto';
+          let resourceType: FileResourceType = 'auto';
           
           if (file.mimetype.startsWith('image/')) {
             resourceType = 'image';
@@ -48,11 +47,11 @@ export class RequestsService {
             resourceType = 'raw';
           }
           
-          return this.cloudinaryService.uploadFile(file, 'partnership-attachments', resourceType);
+          return this.fileStorageService.uploadFile(file, 'partnership-attachments', resourceType);
         })
       );
 
-      const attachmentData = uploadedFiles.map((result: CloudinaryResponse) => ({
+      const attachmentData = uploadedFiles.map((result: FileResponse) => ({
         path: result.secure_url,
         originalName: result.original_filename,
         mimeType: result.format ? `image/${result.format}` : 'application/octet-stream',
@@ -102,15 +101,15 @@ export class RequestsService {
     try {
       const { fullName, email, telegramUsername, jobRoleId } = dto;
       
-      const cvUpload = await this.cloudinaryService.uploadFile(
+      const cvUpload = await this.fileStorageService.uploadFile(
         cv, 
         'job-applications/cv', 
         'raw'
-      ) as CloudinaryResponse;
+      ) as FileResponse;
       
-      let coverLetterUpload: CloudinaryResponse | null = null;
+      let coverLetterUpload: FileResponse | null = null;
       if (coverLetter) {
-        coverLetterUpload = await this.cloudinaryService.uploadFile(
+        coverLetterUpload = await this.fileStorageService.uploadFile(
           coverLetter, 
           'job-applications/cover-letters', 
           'raw'

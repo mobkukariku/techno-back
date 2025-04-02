@@ -9,13 +9,13 @@ import {
   UploadedFiles,
   UseInterceptors,
   BadRequestException,
+  Logger,
 } from "@nestjs/common";
 import { RequestsService } from "./requests.service";
 import { CreateProjectPartnershipDto, CreateJobApplicationDto, CreateJobRoleDto, UpdateJobRoleDto } from "./dto";
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import {
   ApiTags,
-  ApiOperation,
   ApiResponse,
   ApiConsumes,
   ApiBody,
@@ -26,6 +26,8 @@ import {
 @ApiTags("requests")
 @Controller("requests")
 export class RequestsController {
+  private readonly logger = new Logger(RequestsController.name);
+
   constructor(private readonly requestsService: RequestsService) {}
 
   @Get("partnership")
@@ -259,9 +261,17 @@ export class RequestsController {
     @UploadedFiles()
     files: { cv?: Express.Multer.File[]; coverLetter?: Express.Multer.File[] }
   ) {
-    if (!files.cv || files.cv.length === 0) {
-      throw new BadRequestException("CV file is required");
+    this.logger.debug(`Received job application: ${JSON.stringify(dto)}`);
+    this.logger.debug(`Received files: ${files ? Object.keys(files).join(', ') : 'none'}`);
+    
+    if (!files) {
+      throw new BadRequestException("No files were uploaded. Please ensure you're sending files as form-data with correct field names.");
     }
+    
+    if (!files.cv || files.cv.length === 0) {
+      throw new BadRequestException("CV file is required. Please upload a CV file with field name 'cv'.");
+    }
+    
     return this.requestsService.createJobApplication(
       dto,
       files.cv[0],
@@ -270,7 +280,6 @@ export class RequestsController {
   }
 
   @Post("job-roles")
-  @ApiOperation({ summary: "Create a new job role" })
   @ApiBody({
     type: CreateJobRoleDto,
     description: "Job role creation data",
@@ -295,7 +304,6 @@ export class RequestsController {
   }
 
   @Get("job-roles")
-  @ApiOperation({ summary: "Get all active job roles" })
   @ApiResponse({
     status: 200,
     description: "List of active job roles retrieved successfully",
@@ -318,7 +326,6 @@ export class RequestsController {
   }
 
   @Delete("job-roles/:id")
-  @ApiOperation({ summary: "Delete a job role" })
   @ApiParam({ name: "id", type: "string", format: "uuid", description: "Job role ID" })
   @ApiResponse({
     status: 200,
@@ -340,7 +347,6 @@ export class RequestsController {
   }
 
   @Patch("job-roles/:id")
-  @ApiOperation({ summary: "Update a job role" })
   @ApiParam({ name: "id", type: "string", format: "uuid", description: "Job role ID" })
   @ApiBody({
     type: UpdateJobRoleDto,

@@ -4,11 +4,11 @@ import { RequestsController } from './requests.controller';
 import { PrismaService } from '../prisma/prisma.service';
 import { MulterModule } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
-import { CloudinaryModule } from '../cloudinary/cloudinary.module';
+import { FileStorageModule } from '../file-storage/file-storage.module';
 
 @Module({
   imports: [
-    CloudinaryModule,
+    FileStorageModule,
     MulterModule.register({
       storage: memoryStorage(),
     }),
