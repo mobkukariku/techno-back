@@ -29,46 +29,48 @@ export class FileStorageService {
       await fs.mkdir(dirPath, { recursive: true });
     } catch (error) {
       console.error(`Failed to create directory: ${dirPath}`, error);
-      throw new BadRequestException(`Failed to create directory: ${error.message}`);
+      throw new BadRequestException(`Failed to create directory: ${error}`);
     }
   }
 
   async uploadFile(
     file: Express.Multer.File,
     folder: string,
-    resourceType: FileResourceType = 'auto'
+    resourceType: FileResourceType = 'auto',
   ): Promise<FileResponse> {
     try {
-      this.logger.debug(`Uploading file: ${file.originalname}, size: ${file.size}, mimetype: ${file.mimetype}`);
-      
+      this.logger.debug(
+        `Uploading file: ${file.originalname}, size: ${file.size}, mimetype: ${file.mimetype}`,
+      );
+
       const fileExt = path.extname(file.originalname).toLowerCase();
       const baseFilename = path.basename(file.originalname, fileExt);
       const uniqueFilename = `${baseFilename}-${uuidv4()}${fileExt}`;
-      
+
       const dirPath = path.join(this.baseUploadDir, folder);
       await this.ensureDirectoryExists(dirPath);
-      
+
       const filePath = path.join(dirPath, uniqueFilename);
       const relativePath = path.join(folder, uniqueFilename);
-      
+
       await fs.writeFile(filePath, file.buffer);
-      
+
       const fileUrl = `${this.baseUrl}/uploads/${relativePath.replace(/\\/g, '/')}`;
-      
+
       this.logger.debug(`File uploaded successfully to: ${filePath}`);
       this.logger.debug(`File accessible at URL: ${fileUrl}`);
-      
+
       return {
         secure_url: fileUrl,
         public_id: relativePath.replace(/\\/g, '/'),
         original_filename: baseFilename,
         bytes: file.size,
         format: fileExt.replace('.', ''),
-        resource_type: resourceType
+        resource_type: resourceType,
       };
     } catch (error) {
-      this.logger.error(`File upload error: ${error.message}`, error.stack);
-      throw new BadRequestException(`Failed to upload file: ${error.message}`);
+      this.logger.error(`File upload error: ${error}`, error);
+      throw new BadRequestException(`Failed to upload file: ${error}`);
     }
   }
 
@@ -79,7 +81,7 @@ export class FileStorageService {
       return { result: 'ok' };
     } catch (error) {
       console.error('File deletion error:', error);
-      throw new BadRequestException(`Failed to delete file: ${error.message}`);
+      throw new BadRequestException(`Failed to delete file: ${error}`);
     }
   }
 }
