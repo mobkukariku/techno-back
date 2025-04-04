@@ -32,7 +32,6 @@ async function bootstrap() {
       whitelist: true,
     }),
   );
-  
 
   app.enableCors({
     origin: 'http://localhost:3000',
