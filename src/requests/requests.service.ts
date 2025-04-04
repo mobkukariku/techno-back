@@ -2,6 +2,13 @@ import { Injectable, BadRequestException, NotFoundException, Logger } from '@nes
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateRequestsDto, CreateProjectPartnershipDto, CreateJobApplicationDto, CreateJobRoleDto, UpdateJobRoleDto } from './dto';
 import { FileStorageService, FileResponse, FileResourceType } from '../file-storage/file-storage.service';
+import { Prisma, PrismaClient } from '@prisma/client';
+
+// Extend PrismaClient transaction type
+type PrismaTransaction = Omit<
+  PrismaClient, 
+  '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'
+>;
 
 @Injectable()
 export class RequestsService {
@@ -61,8 +68,8 @@ export class RequestsService {
         publicId: result.public_id
       }));
 
-      return this.prisma.$transaction(async (tx) => {
-        const partnership = await (tx as any).projectPartnershipRequest.create({
+      return this.prisma.$transaction(async (tx: PrismaTransaction) => {
+        const partnership = await tx.projectPartnershipRequest.create({
           data: {
             title,
             description,
@@ -72,7 +79,7 @@ export class RequestsService {
         });
 
         if (attachmentData.length > 0) {
-          await (tx as any).partnershipAttachment.createMany({
+          await tx.partnershipAttachment.createMany({
             data: attachmentData.map(attachment => ({
               ...attachment,
               requestId: partnership.id
@@ -83,7 +90,7 @@ export class RequestsService {
         return {
           ...partnership,
           attachments: attachmentData.length > 0 
-            ? await (tx as any).partnershipAttachment.findMany({
+            ? await tx.partnershipAttachment.findMany({
                 where: { requestId: partnership.id }
               }) 
             : []
@@ -121,7 +128,7 @@ export class RequestsService {
         this.logger.log(`Cover letter uploaded successfully. Accessible at: ${coverLetterUpload.secure_url}`);
       }
 
-      return (this.prisma as any).jobApplicationRequest.create({
+      return this.prisma.jobApplicationRequest.create({
         data: {
           fullName,
           email,
@@ -148,7 +155,7 @@ export class RequestsService {
 
   async getAllPartnershipRequests() {
     try {
-      return (this.prisma as any).projectPartnershipRequest.findMany({
+      return this.prisma.projectPartnershipRequest.findMany({
         include: {
           attachments: true
         },
@@ -164,7 +171,7 @@ export class RequestsService {
 
   async getAllJobApplications() {
     try {
-      return (this.prisma as any).jobApplicationRequest.findMany({
+      return this.prisma.jobApplicationRequest.findMany({
         orderBy: {
           createdAt: 'desc'
         }
@@ -179,7 +186,7 @@ export class RequestsService {
     try {
       const { name } = dto;
 
-      return (this.prisma as any).jobRole.create({
+      return this.prisma.jobRole.create({
         data: {
           name
         }
@@ -195,7 +202,7 @@ export class RequestsService {
 
   async getAllJobRoles() {
     try {
-      return (this.prisma as any).jobRole.findMany({
+      return this.prisma.jobRole.findMany({
         where: {
           isActive: true
         },
@@ -211,7 +218,7 @@ export class RequestsService {
 
   async getJobRoleById(id: string) {
     try {
-      const jobRole = await (this.prisma as any).jobRole.findUnique({
+      const jobRole = await this.prisma.jobRole.findUnique({
         where: { id }
       });
       
@@ -228,7 +235,7 @@ export class RequestsService {
 
   async deleteJobRole(id: string) {
     try {
-      const jobRole = await (this.prisma as any).jobRole.findUnique({
+      const jobRole = await this.prisma.jobRole.findUnique({
         where: { id }
       });
       
@@ -236,17 +243,17 @@ export class RequestsService {
         throw new NotFoundException(`Job role with ID ${id} not found`);
       }
 
-      const applicationsCount = await (this.prisma as any).jobApplicationRequest.count({
+      const applicationsCount = await this.prisma.jobApplicationRequest.count({
         where: { jobRoleId: id }
       });
 
       if (applicationsCount > 0) {
-        return (this.prisma as any).jobRole.update({
+        return this.prisma.jobRole.update({
           where: { id },
           data: { isActive: false }
         });
       } else {
-        return (this.prisma as any).jobRole.delete({
+        return this.prisma.jobRole.delete({
           where: { id }
         });
       }
@@ -263,7 +270,7 @@ export class RequestsService {
     try {
       const { name, isActive } = dto;
       
-      const jobRole = await (this.prisma as any).jobRole.findUnique({
+      const jobRole = await this.prisma.jobRole.findUnique({
         where: { id }
       });
       
@@ -271,7 +278,7 @@ export class RequestsService {
         throw new NotFoundException(`Job role with ID ${id} not found`);
       }
       
-      return (this.prisma as any).jobRole.update({
+      return this.prisma.jobRole.update({
         where: { id },
         data: {
           name,
