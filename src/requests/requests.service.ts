@@ -2,13 +2,7 @@ import { Injectable, BadRequestException, NotFoundException, Logger } from '@nes
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateRequestsDto, CreateProjectPartnershipDto, CreateJobApplicationDto, CreateJobRoleDto, UpdateJobRoleDto } from './dto';
 import { FileStorageService, FileResponse, FileResourceType } from '../file-storage/file-storage.service';
-import { Prisma, PrismaClient } from '@prisma/client';
-
-// Extend PrismaClient transaction type
-type PrismaTransaction = Omit<
-  PrismaClient, 
-  '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'
->;
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class RequestsService {
@@ -68,7 +62,7 @@ export class RequestsService {
         publicId: result.public_id
       }));
 
-      return this.prisma.$transaction(async (tx: PrismaTransaction) => {
+      return this.prisma.$transaction(async (tx) => {
         const partnership = await tx.projectPartnershipRequest.create({
           data: {
             title,
@@ -87,13 +81,15 @@ export class RequestsService {
           });
         }
 
+        const attachments = attachmentData.length > 0 
+          ? await tx.partnershipAttachment.findMany({
+              where: { requestId: partnership.id }
+            }) 
+          : [];
+
         return {
           ...partnership,
-          attachments: attachmentData.length > 0 
-            ? await tx.partnershipAttachment.findMany({
-                where: { requestId: partnership.id }
-              }) 
-            : []
+          attachments
         };
       });
     } catch (error) {
