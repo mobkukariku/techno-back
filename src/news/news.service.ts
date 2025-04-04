@@ -101,7 +101,7 @@ export class NewsService {
         content,
         imageURL,
         tags: {
-          deleteMany: {}, // Удаляем старые теги
+          deleteMany: {},
           create: tagIds?.map((tagTitles) => ({
             tag: { connect: { name: tagTitles } },
           })),
