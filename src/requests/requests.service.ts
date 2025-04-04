@@ -1,8 +1,7 @@
 import { Injectable, BadRequestException, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateRequestsDto, CreateProjectPartnershipDto, CreateJobApplicationDto, CreateJobRoleDto, UpdateJobRoleDto } from './dto';
-import { FileStorageService, FileResponse, FileResourceType } from '../file-storage/file-storage.service';
-import { Prisma } from '@prisma/client';
+import { FileStorageService, FileResponse } from '../file-storage/file-storage.service';
 
 @Injectable()
 export class RequestsService {
@@ -38,26 +37,13 @@ export class RequestsService {
       const { title, description, senderName, email } = dto;
 
       const uploadedFiles = await Promise.all(
-        attachments.map(file => {
-          let resourceType: FileResourceType = 'auto';
-          
-          if (file.mimetype.startsWith('image/')) {
-            resourceType = 'image';
-          } else if (file.mimetype === 'application/pdf' || 
-                    file.mimetype.includes('word') || 
-                    file.mimetype.includes('excel') || 
-                    file.mimetype.includes('powerpoint')) {
-            resourceType = 'raw';
-          }
-          
-          return this.fileStorageService.uploadFile(file, 'partnership-attachments', resourceType);
-        })
+        attachments.map(file => this.fileStorageService.uploadFile(file, 'partnership-attachments'))
       );
 
       const attachmentData = uploadedFiles.map((result: FileResponse) => ({
         path: result.secure_url,
         originalName: result.original_filename,
-        mimeType: result.format ? `image/${result.format}` : 'application/octet-stream',
+        mimeType: result.format ? `${result.resource_type}/${result.format}` : 'application/octet-stream',
         size: result.bytes,
         publicId: result.public_id
       }));
@@ -108,8 +94,7 @@ export class RequestsService {
       
       const cvUpload = await this.fileStorageService.uploadFile(
         cv, 
-        'job-applications/cv', 
-        'raw'
+        'job-applications/cv'
       ) as FileResponse;
       
       this.logger.log(`CV uploaded successfully. Accessible at: ${cvUpload.secure_url}`);
@@ -118,8 +103,7 @@ export class RequestsService {
       if (coverLetter) {
         coverLetterUpload = await this.fileStorageService.uploadFile(
           coverLetter, 
-          'job-applications/cover-letters', 
-          'raw'
+          'job-applications/cover-letters'
         );
         this.logger.log(`Cover letter uploaded successfully. Accessible at: ${coverLetterUpload.secure_url}`);
       }

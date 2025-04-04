@@ -3,7 +3,7 @@ import { promises as fs } from 'fs';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
-export type FileResourceType = 'image' | 'video' | 'raw' | 'auto';
+export type FileResourceType = 'image' | 'document' | 'spreadsheet';
 
 export interface FileResponse {
   secure_url: string;
@@ -19,6 +19,22 @@ export class FileStorageService {
   private readonly logger = new Logger(FileStorageService.name);
   private readonly baseUploadDir = 'uploads';
   private readonly baseUrl = process.env.BASE_URL || 'http://localhost:5000';
+  
+  private readonly allowedImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+  private readonly allowedDocumentTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword'];
+  private readonly allowedSpreadsheetTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
+  
+  private readonly extensionToMimeType = {
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.png': 'image/png',
+    '.webp': 'image/webp',
+    '.pdf': 'application/pdf',
+    '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    '.doc': 'application/msword',
+    '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    '.xls': 'application/vnd.ms-excel'
+  };
 
   constructor() {
     this.ensureDirectoryExists(this.baseUploadDir);
@@ -33,15 +49,35 @@ export class FileStorageService {
     }
   }
 
+  private validateFileType(file: Express.Multer.File): FileResourceType {
+    const fileExt = path.extname(file.originalname).toLowerCase();
+    const mimeType = file.mimetype.toLowerCase();
+    
+    if (!Object.keys(this.extensionToMimeType).includes(fileExt)) {
+      throw new BadRequestException(`Unsupported file type: ${fileExt}. Allowed types: jpg, jpeg, png, webp, pdf, docx, doc, xlsx, xls`);
+    }
+    
+    if (this.allowedImageTypes.includes(mimeType)) {
+      return 'image';
+    } else if (this.allowedDocumentTypes.includes(mimeType)) {
+      return 'document';
+    } else if (this.allowedSpreadsheetTypes.includes(mimeType)) {
+      return 'spreadsheet';
+    }
+    
+    throw new BadRequestException(`Unsupported MIME type: ${mimeType}. Allowed types: images, PDFs, Word documents, and Excel spreadsheets`);
+  }
+
   async uploadFile(
     file: Express.Multer.File,
     folder: string,
-    resourceType: FileResourceType = 'auto',
   ): Promise<FileResponse> {
     try {
       this.logger.debug(
         `Uploading file: ${file.originalname}, size: ${file.size}, mimetype: ${file.mimetype}`,
       );
+      
+      const resourceType = this.validateFileType(file);
 
       const fileExt = path.extname(file.originalname).toLowerCase();
       const baseFilename = path.basename(file.originalname, fileExt);

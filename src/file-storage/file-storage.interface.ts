@@ -1,4 +1,4 @@
-export type FileResourceType = 'image' | 'video' | 'raw' | 'auto';
+export type FileResourceType = 'image' | 'document' | 'spreadsheet';
 
 export interface FileResponse {
   secure_url: string;

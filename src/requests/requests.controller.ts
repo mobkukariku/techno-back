@@ -129,7 +129,7 @@ export class RequestsController {
             type: "string",
             format: "binary",
           },
-          description: "Optional project-related documents or images",
+          description: "Optional project-related documents or images (jpg, jpeg, png, webp, pdf, docx, doc, xlsx, xls)",
         },
       },
     },
@@ -208,12 +208,12 @@ export class RequestsController {
         cv: {
           type: "string",
           format: "binary",
-          description: "CV/Resume document (required)",
+          description: "CV/Resume document (required, formats: pdf, docx, doc)",
         },
         coverLetter: {
           type: "string",
           format: "binary",
-          description: "Cover letter document (optional)",
+          description: "Cover letter document (optional, formats: pdf, docx, doc)",
         },
       },
     },
