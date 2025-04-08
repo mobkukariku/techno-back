@@ -34,7 +34,7 @@ export class RequestsService {
     attachments: Express.Multer.File[]
   ) {
     try {
-      const { title, description, senderName, email } = dto;
+      const { title, description, senderName, email, referralSource, organizationInterest } = dto;
 
       const uploadedFiles = await Promise.all(
         attachments.map(file => this.fileStorageService.uploadFile(file, 'partnership-attachments'))
@@ -55,6 +55,8 @@ export class RequestsService {
             description,
             senderName,
             email,
+            referralSource,
+            organizationInterest,
           }
         });
 
@@ -90,7 +92,7 @@ export class RequestsService {
     coverLetter: Express.Multer.File | null
   ) {
     try {
-      const { fullName, email, telegramUsername, jobRoleId } = dto;
+      const { fullName, email, telegramUsername, jobRoleId, referralSource, projectInterests, skills, organizationInterest } = dto;
       
       const cvUpload = await this.fileStorageService.uploadFile(
         cv, 
@@ -114,6 +116,10 @@ export class RequestsService {
           email,
           telegramUsername,
           jobRoleId: jobRoleId || null,
+          referralSource,
+          projectInterests,
+          skills,
+          organizationInterest,
           cvPath: cvUpload.secure_url,
           cvOriginalName: cvUpload.original_filename,
           cvSize: cvUpload.bytes,

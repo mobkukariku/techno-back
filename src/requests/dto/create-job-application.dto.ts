@@ -1,5 +1,11 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString, IsUUID, Length, Matches } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString, IsUUID, Length, Matches, IsEnum } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
+export enum OrganizationInterest {
+  TECHNOPARK = 'Technopark',
+  ENACTUS = 'Enactus',
+  HULTPRIZE = 'HultPrize'
+}
 
 export class CreateJobApplicationDto {
   @ApiProperty({ 
@@ -40,4 +46,44 @@ export class CreateJobApplicationDto {
   @IsOptional()
   @IsUUID()
   jobRoleId?: string;
+
+  @ApiProperty({ 
+    description: 'How the applicant heard about the organization',
+    example: 'LinkedIn',
+    maxLength: 200
+  })
+  @IsNotEmpty()
+  @IsString()
+  @Length(1, 200)
+  referralSource: string;
+
+  @ApiProperty({ 
+    description: 'Projects the applicant is interested in working on',
+    example: 'Frontend development, Mobile applications',
+    maxLength: 500
+  })
+  @IsNotEmpty()
+  @IsString()
+  @Length(1, 500)
+  projectInterests: string;
+
+  @ApiProperty({ 
+    description: 'Skills that the applicant possesses',
+    example: 'JavaScript, React, TypeScript, Node.js',
+    maxLength: 500
+  })
+  @IsNotEmpty()
+  @IsString()
+  @Length(1, 500)
+  skills: string;
+
+  @ApiProperty({ 
+    description: 'Which organizations are you interested in?',
+    enum: OrganizationInterest,
+    example: OrganizationInterest.TECHNOPARK,
+    enumName: 'OrganizationInterest'
+  })
+  @IsNotEmpty()
+  @IsEnum(OrganizationInterest)
+  organizationInterest: OrganizationInterest;
 }

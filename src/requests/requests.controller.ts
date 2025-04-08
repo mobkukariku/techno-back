@@ -101,7 +101,7 @@ export class RequestsController {
   @ApiBody({
     schema: {
       type: "object",
-      required: ["title", "description", "senderName", "email"],
+      required: ["title", "description", "senderName", "email", "referralSource", "organizationInterest"],
       properties: {
         title: {
           type: "string",
@@ -122,6 +122,17 @@ export class RequestsController {
           type: "string",
           example: "john.doe@example.com",
           description: "Email of the sender",
+        },
+        referralSource: {
+          type: "string",
+          example: "LinkedIn",
+          description: "How did you hear about us?",
+        },
+        organizationInterest: {
+          type: "string",
+          enum: ["Technopark", "Enactus", "HultPrize"],
+          example: "Technopark",
+          description: "Which organizations are you interested in?",
         },
         attachments: {
           type: "array",
@@ -145,6 +156,11 @@ export class RequestsController {
         description: { type: "string" },
         senderName: { type: "string" },
         email: { type: "string", format: "email" },
+        referralSource: { type: "string" },
+        organizationInterest: { 
+          type: "string",
+          enum: ["Technopark", "Enactus", "HultPrize"] 
+        },
         createdAt: { type: "string", format: "date-time" },
         updatedAt: { type: "string", format: "date-time" },
         attachments: {
@@ -182,7 +198,7 @@ export class RequestsController {
   @ApiBody({
     schema: {
       type: "object",
-      required: ["fullName", "email", "telegramUsername", "cv"],
+      required: ["fullName", "email", "telegramUsername", "cv", "referralSource", "projectInterests", "skills", "organizationInterest"],
       properties: {
         fullName: {
           type: "string",
@@ -204,6 +220,27 @@ export class RequestsController {
           format: "uuid",
           example: "550e8400-e29b-41d4-a716-446655440000",
           description: "ID of the job role the applicant is applying for (optional)",
+        },
+        referralSource: {
+          type: "string",
+          example: "LinkedIn",
+          description: "How did you hear about us?",
+        },
+        projectInterests: {
+          type: "string",
+          example: "Frontend development, Mobile applications",
+          description: "What projects would you be interested in working on?",
+        },
+        skills: {
+          type: "string",
+          example: "JavaScript, React, TypeScript, Node.js",
+          description: "What skills do you have?",
+        },
+        organizationInterest: {
+          type: "string",
+          enum: ["Technopark", "Enactus", "HultPrize"],
+          example: "Technopark",
+          description: "Which organizations are you interested in?",
         },
         cv: {
           type: "string",
@@ -237,6 +274,13 @@ export class RequestsController {
             name: { type: "string" },
             description: { type: "string", nullable: true }
           }
+        },
+        referralSource: { type: "string" },
+        projectInterests: { type: "string" },
+        skills: { type: "string" },
+        organizationInterest: { 
+          type: "string",
+          enum: ["Technopark", "Enactus", "HultPrize"] 
         },
         cvPath: { type: "string" },
         cvOriginalName: { type: "string" },

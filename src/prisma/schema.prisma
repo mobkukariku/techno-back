@@ -237,14 +237,16 @@ model Requests {
 }
 
 model ProjectPartnershipRequest {
-  id          String                     @id @default(uuid())
-  title       String
-  description String
-  senderName  String
-  email       String
-  createdAt   DateTime                   @default(now())
-  updatedAt   DateTime                   @updatedAt
-  attachments PartnershipAttachment[]
+  id                 String                     @id @default(uuid())
+  title              String
+  description        String
+  senderName         String
+  email              String
+  referralSource     String                     // How did you hear about us?
+  organizationInterest String                   // Which organizations are you interested in?
+  createdAt          DateTime                   @default(now())
+  updatedAt          DateTime                   @updatedAt
+  attachments        PartnershipAttachment[]
 
   @@map("project_partnership_requests")
 }
@@ -269,6 +271,10 @@ model JobApplicationRequest {
   telegramUsername         String
   jobRoleId                String?
   jobRole                  JobRole? @relation(fields: [jobRoleId], references: [id])
+  referralSource           String   // How did you hear about us?
+  projectInterests         String   // Projects interested in working on
+  skills                   String   // Skills that the applicant possesses
+  organizationInterest     String   // Which organizations are you interested in?
   cvPath                   String
   cvOriginalName           String
   cvSize                   Int
