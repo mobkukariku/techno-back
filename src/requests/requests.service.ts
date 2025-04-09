@@ -34,7 +34,7 @@ export class RequestsService {
     attachments: Express.Multer.File[]
   ) {
     try {
-      const { title, description, senderName, email, referralSource, organizationInterest } = dto;
+      const { title, description, senderName, email } = dto;
 
       const uploadedFiles = await Promise.all(
         attachments.map(file => this.fileStorageService.uploadFile(file, 'partnership-attachments'))
@@ -55,8 +55,8 @@ export class RequestsService {
             description,
             senderName,
             email,
-            referralSource,
-            organizationInterest,
+            referralSource: null,
+            organizationInterest: null
           }
         });
 

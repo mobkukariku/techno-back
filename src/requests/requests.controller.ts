@@ -101,7 +101,7 @@ export class RequestsController {
   @ApiBody({
     schema: {
       type: "object",
-      required: ["title", "description", "senderName", "email", "referralSource", "organizationInterest"],
+      required: ["title", "description", "senderName", "email"],
       properties: {
         title: {
           type: "string",
@@ -122,17 +122,6 @@ export class RequestsController {
           type: "string",
           example: "john.doe@example.com",
           description: "Email of the sender",
-        },
-        referralSource: {
-          type: "string",
-          example: "LinkedIn",
-          description: "How did you hear about us?",
-        },
-        organizationInterest: {
-          type: "string",
-          enum: ["Technopark", "Enactus", "HultPrize"],
-          example: "Technopark",
-          description: "Which organizations are you interested in?",
         },
         attachments: {
           type: "array",
@@ -156,11 +145,6 @@ export class RequestsController {
         description: { type: "string" },
         senderName: { type: "string" },
         email: { type: "string", format: "email" },
-        referralSource: { type: "string" },
-        organizationInterest: { 
-          type: "string",
-          enum: ["Technopark", "Enactus", "HultPrize"] 
-        },
         createdAt: { type: "string", format: "date-time" },
         updatedAt: { type: "string", format: "date-time" },
         attachments: {

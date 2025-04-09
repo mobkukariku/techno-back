@@ -242,8 +242,8 @@ model ProjectPartnershipRequest {
   description        String
   senderName         String
   email              String
-  referralSource     String                     // How did you hear about us?
-  organizationInterest String                   // Which organizations are you interested in?
+  referralSource     String?                    // How did you hear about us? (optional)
+  organizationInterest String?                  // Which organizations are you interested in? (optional)
   createdAt          DateTime                   @default(now())
   updatedAt          DateTime                   @updatedAt
   attachments        PartnershipAttachment[]

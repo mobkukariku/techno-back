@@ -1,6 +1,5 @@
-import { IsEmail, IsNotEmpty, IsString, Length, IsEnum } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, Length } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { OrganizationInterest } from './create-job-application.dto';
 
 export class CreateProjectPartnershipDto {
   @ApiProperty({ 
@@ -43,24 +42,4 @@ export class CreateProjectPartnershipDto {
   @IsNotEmpty()
   @IsEmail()
   email: string;
-
-  @ApiProperty({ 
-    description: 'How did you hear about us?',
-    example: 'LinkedIn',
-    maxLength: 200
-  })
-  @IsNotEmpty()
-  @IsString()
-  @Length(1, 200)
-  referralSource: string;
-
-  @ApiProperty({ 
-    description: 'Which organizations are you interested in?',
-    enum: OrganizationInterest,
-    example: OrganizationInterest.TECHNOPARK,
-    enumName: 'OrganizationInterest'
-  })
-  @IsNotEmpty()
-  @IsEnum(OrganizationInterest)
-  organizationInterest: OrganizationInterest;
 }
