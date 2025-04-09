@@ -54,9 +54,16 @@ export class RequestsService {
             title,
             description,
             senderName,
-            email,
-            referralSource: null,
-            organizationInterest: null
+            email
+          },
+          select: {
+            id: true,
+            title: true,
+            description: true, 
+            senderName: true,
+            email: true,
+            createdAt: true,
+            updatedAt: true
           }
         });
 
@@ -142,7 +149,14 @@ export class RequestsService {
   async getAllPartnershipRequests() {
     try {
       return this.prisma.projectPartnershipRequest.findMany({
-        include: {
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          senderName: true,
+          email: true,
+          createdAt: true,
+          updatedAt: true,
           attachments: true
         },
         orderBy: {
