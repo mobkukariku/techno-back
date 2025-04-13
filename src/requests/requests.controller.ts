@@ -56,6 +56,8 @@ export class RequestsController {
                 originalName: { type: "string" },
                 mimeType: { type: "string" },
                 size: { type: "number" },
+                publicId: { type: "string", nullable: true },
+                requestId: { type: "string" }
               },
             },
           },
@@ -80,12 +82,28 @@ export class RequestsController {
           fullName: { type: "string" },
           email: { type: "string", format: "email" },
           telegramUsername: { type: "string" },
+          jobRoleId: { type: "string", format: "uuid", nullable: true },
+          jobRole: { 
+            type: "object", 
+            nullable: true,
+            properties: {
+              id: { type: "string", format: "uuid" },
+              name: { type: "string" },
+              isActive: { type: "boolean" }
+            }
+          },
+          referralSource: { type: "string" },
+          projectInterests: { type: "string" },
+          skills: { type: "string" },
+          organizationInterest: { type: "string" },
           cvPath: { type: "string" },
           cvOriginalName: { type: "string" },
           cvSize: { type: "number" },
+          cvPublicId: { type: "string", nullable: true },
           coverLetterPath: { type: "string", nullable: true },
           coverLetterOriginalName: { type: "string", nullable: true },
           coverLetterSize: { type: "number", nullable: true },
+          coverLetterPublicId: { type: "string", nullable: true },
           createdAt: { type: "string", format: "date-time" },
           updatedAt: { type: "string", format: "date-time" },
         },

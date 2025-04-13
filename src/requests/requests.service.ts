@@ -157,7 +157,17 @@ export class RequestsService {
           email: true,
           createdAt: true,
           updatedAt: true,
-          attachments: true
+          attachments: {
+            select: {
+              id: true,
+              path: true,
+              originalName: true,
+              mimeType: true,
+              size: true,
+              publicId: true,
+              requestId: true
+            }
+          }
         },
         orderBy: {
           createdAt: 'desc'
@@ -172,6 +182,15 @@ export class RequestsService {
   async getAllJobApplications() {
     try {
       return this.prisma.jobApplicationRequest.findMany({
+        include: {
+          jobRole: {
+            select: {
+              id: true,
+              name: true,
+              isActive: true
+            }
+          }
+        },
         orderBy: {
           createdAt: 'desc'
         }
