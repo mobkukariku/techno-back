@@ -22,6 +22,15 @@ async function bootstrap() {
     .build();
 
   app.setGlobalPrefix('api');
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
+
   app.use(cookieParser());
 
   app.use('/images', express.static(join(__dirname, '..', 'images')));

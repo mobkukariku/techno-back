@@ -93,6 +93,7 @@ export class NewsService {
     if (!existingNews) {
       throw new NotFoundException('News not found');
     }
+    const tagIdArray = Array.isArray(tagIds) ? tagIds : tagIds ? [tagIds] : [];
 
     return this.prisma.news.update({
       where: { id },
@@ -102,7 +103,7 @@ export class NewsService {
         imageURL,
         tags: {
           deleteMany: {},
-          create: tagIds?.map((tagTitles) => ({
+          create: tagIdArray?.map((tagTitles) => ({
             tag: { connect: { name: tagTitles } },
           })),
         },

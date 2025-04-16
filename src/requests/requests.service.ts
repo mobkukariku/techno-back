@@ -1,7 +1,21 @@
-import { Injectable, BadRequestException, NotFoundException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+  Logger,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateRequestsDto, CreateProjectPartnershipDto, CreateJobApplicationDto, CreateJobRoleDto, UpdateJobRoleDto } from './dto';
-import { FileStorageService, FileResponse } from '../file-storage/file-storage.service';
+import {
+  CreateRequestsDto,
+  CreateProjectPartnershipDto,
+  CreateJobApplicationDto,
+  CreateJobRoleDto,
+  UpdateJobRoleDto,
+} from './dto';
+import {
+  FileStorageService,
+  FileResponse,
+} from '../file-storage/file-storage.service';
 
 @Injectable()
 export class RequestsService {
@@ -9,7 +23,7 @@ export class RequestsService {
 
   constructor(
     private prisma: PrismaService,
-    private fileStorageService: FileStorageService
+    private fileStorageService: FileStorageService,
   ) {}
 
   async createRequest(dto: CreateRequestsDto) {
@@ -31,21 +45,25 @@ export class RequestsService {
 
   async createPartnershipRequest(
     dto: CreateProjectPartnershipDto,
-    attachments: Express.Multer.File[]
+    attachments: Express.Multer.File[],
   ) {
     try {
       const { title, description, senderName, email } = dto;
 
       const uploadedFiles = await Promise.all(
-        attachments.map(file => this.fileStorageService.uploadFile(file, 'partnership-attachments'))
+        attachments.map((file) =>
+          this.fileStorageService.uploadFile(file, 'partnership-attachments'),
+        ),
       );
 
       const attachmentData = uploadedFiles.map((result: FileResponse) => ({
         path: result.secure_url,
         originalName: result.original_filename,
-        mimeType: result.format ? `${result.resource_type}/${result.format}` : 'application/octet-stream',
+        mimeType: result.format
+          ? `${result.resource_type}/${result.format}`
+          : 'application/octet-stream',
         size: result.bytes,
-        publicId: result.public_id
+        publicId: result.public_id,
       }));
 
       return this.prisma.$transaction(async (tx) => {
@@ -54,67 +72,83 @@ export class RequestsService {
             title,
             description,
             senderName,
-            email
+            email,
           },
           select: {
             id: true,
             title: true,
-            description: true, 
+            description: true,
             senderName: true,
             email: true,
             createdAt: true,
-            updatedAt: true
-          }
+            updatedAt: true,
+          },
         });
 
         if (attachmentData.length > 0) {
           await tx.partnershipAttachment.createMany({
-            data: attachmentData.map(attachment => ({
+            data: attachmentData.map((attachment) => ({
               ...attachment,
-              requestId: partnership.id
-            }))
+              requestId: partnership.id,
+            })),
           });
         }
 
-        const attachments = attachmentData.length > 0 
-          ? await tx.partnershipAttachment.findMany({
-              where: { requestId: partnership.id }
-            }) 
-          : [];
+        const attachments =
+          attachmentData.length > 0
+            ? await tx.partnershipAttachment.findMany({
+                where: { requestId: partnership.id },
+              })
+            : [];
 
         return {
           ...partnership,
-          attachments
+          attachments,
         };
       });
     } catch (error) {
       console.error('Partnership request error:', error);
-      throw new BadRequestException('Failed to create partnership request: ' + error.message);
+      throw new BadRequestException(
+        'Failed to create partnership request: ' + error.message,
+      );
     }
   }
 
   async createJobApplication(
     dto: CreateJobApplicationDto,
     cv: Express.Multer.File,
-    coverLetter: Express.Multer.File | null
+    coverLetter: Express.Multer.File | null,
   ) {
     try {
-      const { fullName, email, telegramUsername, jobRoleId, referralSource, projectInterests, skills, organizationInterest } = dto;
-      
+      const {
+        fullName,
+        email,
+        telegramUsername,
+        jobRoleId,
+        referralSource,
+        projectInterests,
+        skills,
+        organizationInterest,
+      } = dto;
+
       const cvUpload = await this.fileStorageService.uploadFile(
-        cv, 
-        'job-applications/cv'
-      ) as FileResponse;
-      
-      this.logger.log(`CV uploaded successfully. Accessible at: ${cvUpload.secure_url}`);
-      
+        cv,
+        'job-applications/cv',
+      );
+
+      this.logger.log(
+        `CV uploaded successfully. Accessible at: ${cvUpload.secure_url}`,
+      );
+
       let coverLetterUpload: FileResponse | null = null;
       if (coverLetter) {
         coverLetterUpload = await this.fileStorageService.uploadFile(
-          coverLetter, 
-          'job-applications/cover-letters'
+          coverLetter,
+          'job-applications/cover-letters',
         );
-        this.logger.log(`Cover letter uploaded successfully. Accessible at: ${coverLetterUpload.secure_url}`);
+        this.logger.log(
+          `Cover letter uploaded successfully. Accessible at: ${coverLetterUpload.secure_url}`,
+        );
       }
 
       return this.prisma.jobApplicationRequest.create({
@@ -137,12 +171,14 @@ export class RequestsService {
           coverLetterPublicId: coverLetterUpload?.public_id || null,
         },
         include: {
-          jobRole: true
-        }
+          jobRole: true,
+        },
       });
     } catch (error) {
       console.error('Job application error:', error);
-      throw new BadRequestException('Failed to create job application: ' + error.message);
+      throw new BadRequestException(
+        'Failed to create job application: ' + error.message,
+      );
     }
   }
 
@@ -165,13 +201,13 @@ export class RequestsService {
               mimeType: true,
               size: true,
               publicId: true,
-              requestId: true
-            }
-          }
+              requestId: true,
+            },
+          },
         },
         orderBy: {
-          createdAt: 'desc'
-        }
+          createdAt: 'desc',
+        },
       });
     } catch (error) {
       console.error('Get partnerships error:', error);
@@ -187,13 +223,13 @@ export class RequestsService {
             select: {
               id: true,
               name: true,
-              isActive: true
-            }
-          }
+              isActive: true,
+            },
+          },
         },
         orderBy: {
-          createdAt: 'desc'
-        }
+          createdAt: 'desc',
+        },
       });
     } catch (error) {
       console.error('Get job applications error:', error);
@@ -207,15 +243,17 @@ export class RequestsService {
 
       return this.prisma.jobRole.create({
         data: {
-          name
-        }
+          name,
+        },
       });
     } catch (error) {
       console.error('Create job role error:', error);
       if (error.code === 'P2002') {
         throw new BadRequestException('Job role with this name already exists');
       }
-      throw new BadRequestException('Failed to create job role: ' + error.message);
+      throw new BadRequestException(
+        'Failed to create job role: ' + error.message,
+      );
     }
   }
 
@@ -223,11 +261,11 @@ export class RequestsService {
     try {
       return this.prisma.jobRole.findMany({
         where: {
-          isActive: true
+          isActive: true,
         },
         orderBy: {
-          name: 'asc'
-        }
+          name: 'asc',
+        },
       });
     } catch (error) {
       console.error('Get job roles error:', error);
@@ -238,13 +276,13 @@ export class RequestsService {
   async getJobRoleById(id: string) {
     try {
       const jobRole = await this.prisma.jobRole.findUnique({
-        where: { id }
+        where: { id },
       });
-      
+
       if (!jobRole) {
         throw new NotFoundException(`Job role with ID ${id} not found`);
       }
-      
+
       return jobRole;
     } catch (error) {
       console.error('Get job role error:', error);
@@ -255,25 +293,25 @@ export class RequestsService {
   async deleteJobRole(id: string) {
     try {
       const jobRole = await this.prisma.jobRole.findUnique({
-        where: { id }
+        where: { id },
       });
-      
+
       if (!jobRole) {
         throw new NotFoundException(`Job role with ID ${id} not found`);
       }
 
       const applicationsCount = await this.prisma.jobApplicationRequest.count({
-        where: { jobRoleId: id }
+        where: { jobRoleId: id },
       });
 
       if (applicationsCount > 0) {
         return this.prisma.jobRole.update({
           where: { id },
-          data: { isActive: false }
+          data: { isActive: false },
         });
       } else {
         return this.prisma.jobRole.delete({
-          where: { id }
+          where: { id },
         });
       }
     } catch (error) {
@@ -281,32 +319,36 @@ export class RequestsService {
         throw error;
       }
       console.error('Delete job role error:', error);
-      throw new BadRequestException('Failed to delete job role: ' + error.message);
+      throw new BadRequestException(
+        'Failed to delete job role: ' + error.message,
+      );
     }
   }
 
   async updateJobRole(id: string, dto: UpdateJobRoleDto) {
     try {
       const { name, isActive } = dto;
-      
+
       const jobRole = await this.prisma.jobRole.findUnique({
-        where: { id }
+        where: { id },
       });
-      
+
       if (!jobRole) {
         throw new NotFoundException(`Job role with ID ${id} not found`);
       }
-      
+
       return this.prisma.jobRole.update({
         where: { id },
         data: {
           name,
-          isActive
-        }
+          isActive,
+        },
       });
     } catch (error) {
       console.error('Update job role error:', error);
-      throw new BadRequestException('Failed to update job role: ' + error.message);
+      throw new BadRequestException(
+        'Failed to update job role: ' + error.message,
+      );
     }
   }
 }

@@ -29,10 +29,8 @@ export class CreateNewsDto {
     ],
     description: 'Array of tag IDs',
   })
-  @IsArray({ message: 'tagIds must be an array' })
   @IsUUID('4', { each: true, message: 'Each tag ID must be a valid UUID' })
-  tagIds: string[];
-
+  tagIds: string[] | string;
   @ApiPropertyOptional({
     example: 'https://example.com/image.jpg',
     description: 'Image URL',
