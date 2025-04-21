@@ -1,9 +1,0 @@
-services:
-  backend:
-    build: .
-    container_name: nestjs_app
-    restart: always
-    ports:
-      - "5000:5000"
-    env_file:
-      - .env
