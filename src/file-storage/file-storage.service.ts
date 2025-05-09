@@ -18,7 +18,7 @@ export interface FileResponse {
 export class FileStorageService {
   private readonly logger = new Logger(FileStorageService.name);
   private readonly baseUploadDir = 'uploads';
-  private readonly baseUrl = process.env.BASE_URL || 'http://localhost:5000';
+  private readonly baseUrl = process.env.BASE_URL || 'https://sdutechnopark.kz';
   
   private readonly allowedImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
   private readonly allowedDocumentTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword'];

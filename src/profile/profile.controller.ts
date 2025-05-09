@@ -40,7 +40,7 @@ export class ProfileController {
     @Body() dto: CreateProfileDto,
   ) {
     const imageURL = file
-      ? `http://localhost:5000/images/profiles/${file.filename}`
+      ? `https://sdutechnopark.kz/images/profiles/${file.filename}`
       : null;
 
     return this.profileService.createProfile({
