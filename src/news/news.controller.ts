@@ -79,7 +79,9 @@ export class NewsController {
     @UploadedFile() file: Express.Multer.File,
     @Body() dto: Partial<CreateNewsDto>,
   ) {
-    const imageURL = file ? `images/news/${file.filename}` : undefined;
+    const imageURL = file
+      ? `https://sdutechnopark.kz/images/news/${file.filename}`
+      : undefined;
 
     return this.newsService.updateNews(id, {
       ...dto,
