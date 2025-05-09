@@ -3,27 +3,27 @@ generator client {
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 model User {
-  id       String  @id @default(uuid())
-  email    String  @unique
+  id       String @id @default(uuid())
+  email    String @unique
   password String
   name     String
-  role     Role    @default(member)
+  role     Role   @default(member)
 
   news News[]
 
-  memberProfile MemberProfile?
-  workExperience WorkExperience[]
-  headOfDepartments   Department[]
+  memberProfile         MemberProfile?
+  workExperience        WorkExperience[]
+  headOfDepartments     Department[]
   departmentMemberships DepartmentMember[]
-  contacts Contact[]
-  isActive Boolean @default(true)
-  createdAt DateTime @default(now())
+  contacts              Contact[]
+  isActive              Boolean            @default(true)
+  createdAt             DateTime           @default(now())
 
   @@map("users")
 }
@@ -36,11 +36,11 @@ model MemberProfile {
   position    String?
   description String?
 
-  skills      MemberProfileSkill[]
+  skills       MemberProfileSkill[]
   certificates Certificate[]
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("member_profiles")
 }
@@ -62,13 +62,11 @@ model MemberProfileSkill {
   skill   Skill         @relation(fields: [skillId], references: [id], onDelete: Cascade)
 
   @@id([profileId, skillId])
-
-
   @@map("member_profile_skills")
 }
 
 model Certificate {
-  id              String  @id @default(uuid())
+  id              String        @id @default(uuid())
   memberProfile   MemberProfile @relation(fields: [memberProfileId], references: [id], onDelete: Cascade)
   memberProfileId String
 
@@ -83,14 +81,13 @@ model Certificate {
   @@map("certificates")
 }
 
-
 model Contact {
   id     String @id @default(uuid())
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String
 
-  type   ContactType
-  value  String
+  type  ContactType
+  value String
 
   createdAt DateTime @default(now())
 
@@ -105,19 +102,16 @@ enum ContactType {
   OTHER
 }
 
-
-
-
 model Department {
-  id String @id @default(uuid())
-  name String?
-  headId String?
-  head      User?      @relation(fields: [headId], references: [id], onDelete: SetNull)
+  id                 String             @id @default(uuid())
+  name               String?
+  headId             String?
+  head               User?              @relation(fields: [headId], references: [id], onDelete: SetNull)
   parentDepartmentId String?
-  parentDepartment   Department? @relation("DepartmentHierarchy", fields: [parentDepartmentId], references: [id], onDelete: SetNull)
-  subDepartments     Department[] @relation("DepartmentHierarchy")
-  isActive  Boolean @default(true)
-  members DepartmentMember[]
+  parentDepartment   Department?        @relation("DepartmentHierarchy", fields: [parentDepartmentId], references: [id], onDelete: SetNull)
+  subDepartments     Department[]       @relation("DepartmentHierarchy")
+  isActive           Boolean            @default(true)
+  members            DepartmentMember[]
 
   projects Projects[]
 
@@ -128,14 +122,13 @@ model Department {
 }
 
 model DepartmentMember {
-  id String @id @default(uuid())
-  userId String
+  id           String     @id @default(uuid())
+  userId       String
   departmentId String
-  User User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  User         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
 
-
-  role         MemberRole @default(member)
+  role MemberRole @default(member)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -144,17 +137,15 @@ model DepartmentMember {
   @@map("department_members")
 }
 
-
 model WorkExperience {
-  id String @id @default(uuid())
-  userId String
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  company String
-  position String
-  startDate DateTime?
-  endDate DateTime?
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company     String
+  position    String
+  startDate   DateTime?
+  endDate     DateTime?
   description String?
-
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -163,8 +154,8 @@ model WorkExperience {
 }
 
 model Tags {
-  id   String @id @default(uuid())
-  name String @unique()
+  id   String     @id @default(uuid())
+  name String     @unique()
   news NewsTags[]
 }
 
@@ -176,7 +167,7 @@ model News {
   authorId  String
   author    User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
   tags      NewsTags[]
-  isActive  Boolean @default(true)
+  isActive  Boolean    @default(true)
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 
@@ -193,24 +184,23 @@ model NewsTags {
   @@id([newsId, tagId])
 }
 
-
 model Projects {
-  id          String    @id @default(uuid())
+  id          String         @id @default(uuid())
   title       String
   description String
   images      ProjectImage[]
 
   departmentId String
   department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
-  isActive  Boolean @default(true)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  isActive     Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 
   @@map("projects")
 }
 
 model ProjectImage {
-  id        String  @id @default(uuid())
+  id        String   @id @default(uuid())
   imageUrl  String
   projectId String
   project   Projects @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -220,44 +210,43 @@ model ProjectImage {
   @@map("project_images")
 }
 
-
 model Requests {
-  id         String    @id @default(uuid())
-  name       String
-  email      String
-  message    String
-  direction  Direction @relation(fields: [directionId], references: [id])
+  id        String    @id @default(uuid())
+  name      String
+  email     String
+  message   String
+  direction Direction @relation(fields: [directionId], references: [id])
 
   directionId String
-  isActive  Boolean @default(true)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@map("requests")
 }
 
 model ProjectPartnershipRequest {
-  id                 String                     @id @default(uuid())
-  title              String
-  description        String
-  senderName         String
-  email              String
-  referralSource     String?                    // How did you hear about us? (optional)
-  organizationInterest String?                  // Which organizations are you interested in? (optional)
-  createdAt          DateTime                   @default(now())
-  updatedAt          DateTime                   @updatedAt
-  attachments        PartnershipAttachment[]
+  id                   String                  @id @default(uuid())
+  title                String
+  description          String
+  senderName           String
+  email                String
+  referralSource       String? // How did you hear about us? (optional)
+  organizationInterest String? // Which organizations are you interested in? (optional)
+  createdAt            DateTime                @default(now())
+  updatedAt            DateTime                @updatedAt
+  attachments          PartnershipAttachment[]
 
   @@map("project_partnership_requests")
 }
 
 model PartnershipAttachment {
-  id                        String                  @id @default(uuid())
+  id                        String                    @id @default(uuid())
   path                      String
   originalName              String
   mimeType                  String
   size                      Int
-  publicId                  String?                 
+  publicId                  String?
   projectPartnershipRequest ProjectPartnershipRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
   requestId                 String
 
@@ -265,36 +254,36 @@ model PartnershipAttachment {
 }
 
 model JobApplicationRequest {
-  id                       String   @id @default(uuid())
-  fullName                 String
-  email                    String
-  telegramUsername         String
-  jobRoleId                String?
-  jobRole                  JobRole? @relation(fields: [jobRoleId], references: [id])
-  referralSource           String   // How did you hear about us?
-  projectInterests         String   // Projects interested in working on
-  skills                   String   // Skills that the applicant possesses
-  organizationInterest     String   // Which organizations are you interested in?
-  cvPath                   String
-  cvOriginalName           String
-  cvSize                   Int
-  cvPublicId               String?  
-  coverLetterPath          String?
-  coverLetterOriginalName  String?
-  coverLetterSize          Int?
-  coverLetterPublicId      String? 
-  createdAt                DateTime @default(now())
-  updatedAt                DateTime @updatedAt
+  id                      String   @id @default(uuid())
+  fullName                String
+  email                   String
+  telegramUsername        String
+  jobRoleId               String?
+  jobRole                 JobRole? @relation(fields: [jobRoleId], references: [id])
+  referralSource          String // How did you hear about us?
+  projectInterests        String // Projects interested in working on
+  skills                  String // Skills that the applicant possesses
+  organizationInterest    String // Which organizations are you interested in?
+  cvPath                  String
+  cvOriginalName          String
+  cvSize                  Int
+  cvPublicId              String?
+  coverLetterPath         String?
+  coverLetterOriginalName String?
+  coverLetterSize         Int?
+  coverLetterPublicId     String?
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
 
   @@map("job_application_requests")
 }
 
 model JobRole {
-  id          String                @id @default(uuid())
-  name        String                @unique
-  isActive    Boolean               @default(true)
-  createdAt   DateTime              @default(now())
-  updatedAt   DateTime              @updatedAt
+  id           String                  @id @default(uuid())
+  name         String                  @unique
+  isActive     Boolean                 @default(true)
+  createdAt    DateTime                @default(now())
+  updatedAt    DateTime                @updatedAt
   applications JobApplicationRequest[]
 
   @@map("job_roles")
@@ -305,10 +294,10 @@ model Direction {
   name String @unique
 
   requests Requests[]
-  isActive  Boolean @default(true)
+  isActive Boolean    @default(true)
+
   @@map("directions")
 }
-
 
 enum Role {
   member
