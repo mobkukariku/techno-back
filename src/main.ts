@@ -43,9 +43,22 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: process.env.CLIENT_URL || 'http://localhost:3000',
-    credentials: true,
-  });
+  origin: (origin, callback) => {
+    const allowedOrigins = [
+      process.env.CLIENT_URL,
+      'http://localhost:3000',
+    ];
+
+    // Если origin не указан (например, curl или postman), просто разрешаем
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+});
+
   
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
